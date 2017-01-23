@@ -1,0 +1,31 @@
+//Aqui se estructurara en pseudocodigo el algoritmo del programa.
+funcion detectarLinea(){
+
+}
+funcion BuscarPelota(){
+TCOP
+}
+void setup(){
+
+}
+
+void loop(){
+
+  if(NoDetectaLinea == True){
+    BuscarPelota();
+    
+
+
+  }
+
+  else{
+    Alejarse de la linea;
+  
+  
+  }
+
+
+
+
+
+}
