@@ -1,12 +1,15 @@
 //Aqui se estructurara en pseudocodigo el algoritmo del programa.
 funcion detectarLinea(){
-
+TCRT5000
 }
 funcion BuscarPelota(){
-TCOP
+TSOP
+}
+funcion UbicacionInicial(){
+MPU5060
 }
 void setup(){
-
+UbicacionInicial();
 }
 
 void loop(){
