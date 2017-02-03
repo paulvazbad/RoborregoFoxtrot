@@ -4,12 +4,11 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   IMU I1;
-  double dGx, dGy;
+  double iAngle;
 }
 
 void loop() {
-  dGx= I1.getGyroX();
-  dGy= I1.getGyroY();  
+ iAngle = I1.getAngle(); 
   // put your main code here, to run repeatedly:
 
 }
