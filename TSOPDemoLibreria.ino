@@ -5,7 +5,6 @@
  * Copyright 2009 Ken Shirriff
  * http://arcfn.com
  */
-
 #include <IRremote.h>
 
 int RECV_PIN = 11;
@@ -24,5 +23,9 @@ void loop() {
   if (irrecv.decode(&results)) {
     Serial.println(results.value, HEX);
     irrecv.resume(); // Receive the next value
+  }
+  else{
+    Serial.println("No encuentro la pelota");
+  
   }
 }
