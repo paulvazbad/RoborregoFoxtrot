@@ -9,17 +9,17 @@
 #define qa 19
 float DerD, IzqD, EnfrD, AtrasD;
 //Definiendo motores
-#define FrontMotorLeftS1 8
-#define FrontMotorLeftS2 9
-#define FrontMotorRightS1 10
-#define FrontMotorRightS2 11
+#define FrontMotorLeftS1 4
+#define FrontMotorLeftS2 5
+#define FrontMotorRightS1 6
+#define FrontMotorRightS2 7
 
-#define BackMotorLeftS1 12
-#define BackMotorLeftS2 13
-#define BackMotorRightS1 14
-#define BackMotorRightS2 15
-#define RodilloS1       16
-#define RodilloS2       17
+#define BackMotorLeftS1 8
+#define BackMotorLeftS2 9
+#define BackMotorRightS1 10
+#define BackMotorRightS2 11
+#define RodilloS1       12
+#define RodilloS2       13
 //Definiendo TSOPS
 #define FrontIr 22
 #define LeftIr 23
@@ -41,24 +41,24 @@ dProm[1]=DerechaEnfrente
 */
 double dProm[7];
 
-void setup() {
-  sensors_event_t event;
-  bno.getEvent(&event);
-  double dNorte=event.orientation.x;
+void setup(void) {
   Serial.begin(9600);
+  bno.begin();
+  delay(1000);
   bno.setExtCrystalUse(true);
-  Serial.print("El norte esta aca: ");
+  double dNorte=dGetDirect();
+  Serial.println("El norte esta aqui amiguito: ");
   Serial.println(dNorte);
   //Qrd's
   pinMode(qd,INPUT);
   pinMode(qi,INPUT);
   pinMode(qa,INPUT);
   pinMode(qe,INPUT);
-  attachInterrupt(digitalPinToInterrupt(qe), INTERmoveBackward, LOW);
+  /*attachInterrupt(digitalPinToInterrupt(qe), INTERmoveBackward, LOW);
   attachInterrupt(digitalPinToInterrupt(qa), INTERmoveForward, LOW);
   attachInterrupt(digitalPinToInterrupt(qi), INTERmoveRight, LOW);
   attachInterrupt(digitalPinToInterrupt(qd), INTERmoveLeft, LOW);
-
+*/
   //Puentes H
   pinMode(FrontMotorLeftS1,OUTPUT);
   pinMode(FrontMotorLeftS2,OUTPUT);
@@ -119,7 +119,6 @@ void INTERmoveRight(){
   digitalWrite(BackMotorLeftS2,pot);
   digitalWrite(BackMotorRightS1,LOW);
   digitalWrite(BackMotorRightS2,pot);
-  delay(500);
 }
 void INTERmoveBackward(){
   Serial.println("Se interrumpio esto");
@@ -216,17 +215,14 @@ void moveBackward(int pot, int tiempo){
 void turnRight(int dOrientacionGrados){
   int pot=200;
   moveStay();
-  sensors_event_t event;
-  bno.getEvent(&event);
-  Serial.print("X: ");
-  Serial.print(event.orientation.x,4);
-  double dOrientacionAct=event.orientation.x;
+  double dOrientacionAct=dGetDirect();
   double dOrientacionIni=dOrientacionAct;
   double dOrientacionF=dOrientacionAct+dOrientacionGrados;
   if(dOrientacionF<=360){
     while(dOrientacionAct<=dOrientacionF){
+      Serial.println("El angulo a girar excede de los 360");
+      delay(500);
      int pot = map(dOrientacionAct,dOrientacionF,dOrientacionIni,100,200);
-     dOrientacionAct=event.orientation.x;
      digitalWrite(FrontMotorLeftS1,pot);
      digitalWrite(FrontMotorLeftS2,LOW);
      digitalWrite(FrontMotorRightS1,pot);
@@ -242,7 +238,8 @@ void turnRight(int dOrientacionGrados){
    double dSobrante=dOrientacionF-360;
    while(dOrientacionAct<=360 && dOrientacionAct!=0 ){
      pot = map(dOrientacionAct,dOrientacionIni,dOrientacionF,200,100);
-     dOrientacionAct=event.orientation.x;
+     dOrientacionAct=dGetDirect();
+     Serial.println(dOrientacionAct);
      digitalWrite(FrontMotorLeftS1,pot);
      digitalWrite(FrontMotorLeftS2,LOW);
      digitalWrite(FrontMotorRightS1,pot);
@@ -254,8 +251,8 @@ void turnRight(int dOrientacionGrados){
 
     }
    while(dOrientacionAct<=dSobrante){
+     dOrientacionAct=dGetDirect();
     pot= map(dOrientacionAct,0,dSobrante,pot,100);
-     dOrientacionAct=event.orientation.x;
      digitalWrite(FrontMotorLeftS1,pot);
      digitalWrite(FrontMotorLeftS2,LOW);
      digitalWrite(FrontMotorRightS1,pot);
@@ -272,17 +269,13 @@ void turnLeft(int dOrientacionGrados){
   //Falta revisar este bloque
   int pot=200;
   moveStay();
-  sensors_event_t event;
-  bno.getEvent(&event);
-  Serial.print("X: ");
-  Serial.print(event.orientation.x, 4);
-  double dOrientacionAct=event.orientation.x;
+  double dOrientacionAct=dGetDirect();
   double dOrientacionIni=dOrientacionAct;
   double dOrientacionF=dOrientacionAct-dOrientacionGrados;
   if(dOrientacionF>=0){
     while(dOrientacionAct>dOrientacionF){
-      int pot = map(dOrientacionAct,dOrientacionIni,dOrientacionF,200,100);
-       dOrientacionAct=event.orientation.x;
+       dOrientacionAct=dGetDirect();
+       int pot = map(dOrientacionAct,dOrientacionIni,dOrientacionF,200,100);
        digitalWrite(FrontMotorLeftS1,LOW);
        digitalWrite(FrontMotorLeftS2,pot);
        digitalWrite(FrontMotorRightS1,LOW);
@@ -297,7 +290,7 @@ void turnLeft(int dOrientacionGrados){
     double dSobrante=dOrientacionF+360;
     while(dOrientacionAct>=0 && dOrientacionAct!=360){
        pot = map(dOrientacionAct,dOrientacionIni,dOrientacionF,200,100);
-       dOrientacionAct=event.orientation.x;
+       dOrientacionAct=dGetDirect();
        digitalWrite(FrontMotorLeftS1,LOW);
        digitalWrite(FrontMotorLeftS2,pot);
        digitalWrite(FrontMotorRightS1,LOW);
@@ -308,9 +301,10 @@ void turnLeft(int dOrientacionGrados){
        digitalWrite(BackMotorRightS2,pot);
      }
      while(dOrientacionAct>dSobrante){
+
+       dOrientacionAct=dGetDirect();
        pot= map(dOrientacionAct,360,dSobrante,pot,100);
        pot = map(dOrientacionAct,dOrientacionIni,dOrientacionF,200,100);
-       dOrientacionAct=event.orientation.x;
        digitalWrite(FrontMotorLeftS1,LOW);
        digitalWrite(FrontMotorLeftS2,pot);
        digitalWrite(FrontMotorRightS1,LOW);
@@ -382,13 +376,27 @@ void IrBalls(){
 
 }
 //---------------------------------------------------------------------------------------------------------------
+double dGetDirect(){
+  sensors_event_t event;
+  bno.getEvent(&event);
+  double dOrientacionAct=event.orientation.x;
+  delay(500);
+  return dOrientacionAct;
 
+
+}
 void loop(){
-  IrValues();
+  Serial.println(dGetDirect());
+  moveForward(200, 3000);
+  /*IrValues();
   IrBalls();
   if(BallFront){
     moveForward(150,100);
     suck();
     }
     shoot();
+  else{
+    moveBackward(100, 100);
+    }
+    */
 }
