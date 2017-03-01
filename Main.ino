@@ -9,15 +9,15 @@
 #define qa 19
 float DerD, IzqD, EnfrD, AtrasD;
 //Definiendo motores
-#define FrontMotorLeftS1 4
-#define FrontMotorLeftS2 5
+#define FrontMotorLeftS1 5
+#define FrontMotorLeftS2 4
 #define FrontMotorRightS1 6
 #define FrontMotorRightS2 7
 
-#define BackMotorLeftS1 8
-#define BackMotorLeftS2 9
-#define BackMotorRightS1 10
-#define BackMotorRightS2 11
+#define BackMotorLeftS1 9
+#define BackMotorLeftS2 8
+#define BackMotorRightS1 11
+#define BackMotorRightS2 10
 #define RodilloS1       12
 #define RodilloS2       13
 //Definiendo TSOPS
@@ -213,16 +213,20 @@ void moveBackward(int pot, int tiempo){
   delay(tiempo);
 }
 void turnRight(int dOrientacionGrados){
-  int pot=200;
+  Serial.println("Entre a la vuelta derecha");
+  double pot=200;
   moveStay();
   double dOrientacionAct=dGetDirect();
   double dOrientacionIni=dOrientacionAct;
   double dOrientacionF=dOrientacionAct+dOrientacionGrados;
   if(dOrientacionF<=360){
     while(dOrientacionAct<=dOrientacionF){
-      Serial.println("El angulo a girar excede de los 360");
+      dOrientacionAct=dGetDirect();
+      Serial.println("NO El angulo a girar excede de los 360");
       delay(500);
-     int pot = map(dOrientacionAct,dOrientacionF,dOrientacionIni,100,200);
+      pot = dOrientacionF-dOrientacionAct;
+      Serial.print("La potencia es de: ");
+      Serial.println(pot);
      digitalWrite(FrontMotorLeftS1,pot);
      digitalWrite(FrontMotorLeftS2,LOW);
      digitalWrite(FrontMotorRightS1,pot);
@@ -237,8 +241,10 @@ void turnRight(int dOrientacionGrados){
  else{
    double dSobrante=dOrientacionF-360;
    while(dOrientacionAct<=360 && dOrientacionAct!=0 ){
-     pot = map(dOrientacionAct,dOrientacionIni,dOrientacionF,200,100);
+     //Potencia original
      dOrientacionAct=dGetDirect();
+     Serial.print("La potencia es de: ");
+     Serial.println(pot);
      Serial.println(dOrientacionAct);
      digitalWrite(FrontMotorLeftS1,pot);
      digitalWrite(FrontMotorLeftS2,LOW);
@@ -252,7 +258,9 @@ void turnRight(int dOrientacionGrados){
     }
    while(dOrientacionAct<=dSobrante){
      dOrientacionAct=dGetDirect();
-    pot= map(dOrientacionAct,0,dSobrante,pot,100);
+     pot=  dOrientacionF-dOrientacionAct;
+     Serial.print("La potencia es de: ");
+     Serial.println(pot);
      digitalWrite(FrontMotorLeftS1,pot);
      digitalWrite(FrontMotorLeftS2,LOW);
      digitalWrite(FrontMotorRightS1,pot);
@@ -266,8 +274,9 @@ void turnRight(int dOrientacionGrados){
   }
 }
 void turnLeft(int dOrientacionGrados){
+  Serial.println("Entre a la vuelta izquierda");
   //Falta revisar este bloque
-  int pot=200;
+  double pot=200;
   moveStay();
   double dOrientacionAct=dGetDirect();
   double dOrientacionIni=dOrientacionAct;
@@ -275,7 +284,9 @@ void turnLeft(int dOrientacionGrados){
   if(dOrientacionF>=0){
     while(dOrientacionAct>dOrientacionF){
        dOrientacionAct=dGetDirect();
-       int pot = map(dOrientacionAct,dOrientacionIni,dOrientacionF,200,100);
+       pot = dOrientacionAct-dOrientacionF;
+       Serial.print("La potencia es de: ");
+       Serial.println(pot);
        digitalWrite(FrontMotorLeftS1,LOW);
        digitalWrite(FrontMotorLeftS2,pot);
        digitalWrite(FrontMotorRightS1,LOW);
@@ -289,7 +300,7 @@ void turnLeft(int dOrientacionGrados){
   else{
     double dSobrante=dOrientacionF+360;
     while(dOrientacionAct>=0 && dOrientacionAct!=360){
-       pot = map(dOrientacionAct,dOrientacionIni,dOrientacionF,200,100);
+      //POtencia original
        dOrientacionAct=dGetDirect();
        digitalWrite(FrontMotorLeftS1,LOW);
        digitalWrite(FrontMotorLeftS2,pot);
@@ -301,10 +312,8 @@ void turnLeft(int dOrientacionGrados){
        digitalWrite(BackMotorRightS2,pot);
      }
      while(dOrientacionAct>dSobrante){
-
        dOrientacionAct=dGetDirect();
-       pot= map(dOrientacionAct,360,dSobrante,pot,100);
-       pot = map(dOrientacionAct,dOrientacionIni,dOrientacionF,200,100);
+       pot = dSobrante;
        digitalWrite(FrontMotorLeftS1,LOW);
        digitalWrite(FrontMotorLeftS2,pot);
        digitalWrite(FrontMotorRightS1,LOW);
@@ -387,16 +396,10 @@ double dGetDirect(){
 }
 void loop(){
   Serial.println(dGetDirect());
-  moveForward(200, 3000);
-  /*IrValues();
-  IrBalls();
-  if(BallFront){
-    moveForward(150,100);
-    suck();
-    }
-    shoot();
-  else{
-    moveBackward(100, 100);
-    }
-    */
+  if(Serial.read()=='l'){
+    turnLeft(100);
+  }
+  else if(Serial.read()=='r'){
+    turnRight(100);
+  }
 }
