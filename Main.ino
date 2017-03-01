@@ -1,3 +1,4 @@
+
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
@@ -9,17 +10,16 @@
 #define qa 19
 float DerD, IzqD, EnfrD, AtrasD;
 //Definiendo motores
-#define FrontMotorLeftS1 5
-#define FrontMotorLeftS2 4
+#define FrontMotorLeftS1 10
+#define FrontMotorLeftS2 11
 #define FrontMotorRightS1 6
 #define FrontMotorRightS2 7
-
 #define BackMotorLeftS1 9
 #define BackMotorLeftS2 8
-#define BackMotorRightS1 11
-#define BackMotorRightS2 10
-#define RodilloS1       12
-#define RodilloS2       13
+#define BackMotorRightS1 4
+#define BackMotorRightS2 5
+#define RodilloS1       3
+#define RodilloS2       2
 //Definiendo TSOPS
 #define FrontIr 22
 #define LeftIr 23
@@ -29,6 +29,7 @@ float DerD, IzqD, EnfrD, AtrasD;
 #define FrontLeftIr 26
 #define FrontRightIr 27
 #define BackLeftIr 28
+
 //Inicialiando el IMU
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 //Variable de posicion de la pelota global
@@ -36,8 +37,6 @@ bool BallFront, BallLeft, BallRight, BallBack;
 /*
 dProm[0]=Enfrente
 dProm[1]=DerechaEnfrente
-
-
 */
 double dProm[7];
 
@@ -160,8 +159,10 @@ void  suck() {
   digitalWrite(RodilloS1,LOW);
   digitalWrite(RodilloS2,HIGH);
 }
-
-
+void  stopR() {
+  analogWrite(RodilloS1,LOW);
+  analogWrite(RodilloS2,LOW);
+}
 
 void moveForward(int pot, int tiempo){
   moveStay();
@@ -211,6 +212,68 @@ void moveBackward(int pot, int tiempo){
   digitalWrite(BackMotorRightS1,pot);
   digitalWrite(BackMotorRightS2,LOW);
   delay(tiempo);
+}
+void movPers(int p1,int p2, int p3, int p4){
+  int fL=p1;
+  int fR=p2;
+  int bL=p3;
+  int bR=p4;
+  //FrontLeft--------------------------------
+  if(fL>=0){
+  fL=constrain(fL,0,100);
+  fL=map(fL,0,100,0,255);
+  analogWrite(FrontMotorLeftS1,fL);
+  analogWrite(FrontMotorLeftS2,LOW);
+  }
+  else if(fL<0){
+  fL= fL*-1;
+  fL=constrain(fL,0,100);
+  fL=map(fL,0,100,0,255);
+  analogWrite(FrontMotorLeftS1,LOW);
+  analogWrite(FrontMotorLeftS2,fL);
+  }
+  //FrontRight--------------------------------
+  if(fR>=0){
+  fR=constrain(fR,0,100);
+  fR=map(fR,0,100,0,255);
+  analogWrite(FrontMotorRightS1,LOW);
+  analogWrite(FrontMotorRightS2,fR);
+  }
+  else if(fR<0){
+  fR= fR*-1;
+  fR=constrain(fR,0,100);
+  fR=map(fR,0,100,0,255);
+  analogWrite(FrontMotorRightS1,fR);
+  analogWrite(FrontMotorRightS2,LOW);
+  }
+  //BackLeft--------------------------------
+  if(bL>=0){
+  bL=constrain(bL,0,100);
+  bL=map(bL,0,100,0,255);
+  analogWrite(BackMotorLeftS1,bL);
+  analogWrite(BackMotorLeftS2,LOW);
+  }
+  else if(bL<0){
+  bL= bL*-1;
+  bL=constrain(bL,0,100);
+  bL=map(bL,0,100,0,255);
+  analogWrite(BackMotorLeftS1,LOW);
+  analogWrite(BackMotorLeftS2,bL);
+  }
+  //BackRight--------------------------------
+  if(bR>=0){
+  bR=constrain(bR,0,100);
+  bR=map(bR,0,100,0,255);
+  analogWrite(BackMotorRightS1,LOW);
+  analogWrite(BackMotorRightS2,bR);
+  }
+  else if(bR<0){
+  bR= bR*-1;
+  bR=constrain(bR,0,100);
+  bR=map(bR,0,100,0,255);
+  analogWrite(BackMotorRightS1,bR);
+  analogWrite(BackMotorRightS2,LOW);
+  }
 }
 void turnRight(int dOrientacionGrados){
   Serial.println("Entre a la vuelta derecha");
@@ -325,6 +388,9 @@ void turnLeft(int dOrientacionGrados){
      }
    }
   }
+
+  
+  
   //-----------------------------------------------------------------------------------------------------------------------------------------------
   //TSOPS ------------------------------------------------------------------------------------------------------------------------------------------
 void prom(double a[][29], int largo) {
