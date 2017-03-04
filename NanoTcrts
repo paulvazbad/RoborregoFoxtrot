@@ -1,0 +1,109 @@
+//TCRTS
+#define qf A7
+#define ql A1
+#define qr A2
+#define qb A3
+int iFrontIr,iLeftIr, iRightIr, iBackIr;
+//Interruptions
+#define s1 4
+#define s2 5
+#define s3 6
+#define s4 7
+
+void setup() {
+  //Comunicación Cereal
+  Serial.begin(9600);
+  //TCRT'S
+  pinMode(qf,INPUT);
+  pinMode(ql,INPUT);
+  pinMode(qr,INPUT);
+  pinMode(qb,INPUT);
+  //Interrupts
+  pinMode(s1,OUTPUT);
+  pinMode(s2,OUTPUT);
+  pinMode(s3,OUTPUT);
+  pinMode(s4,OUTPUT)
+
+  pinMode(s1,HIGH);
+  pinMode(s2,HIGH);
+  pinMode(s3,HIGH);
+  pinMode(s4,HIGH);
+}
+
+int prom(int a[], int largo) {
+    for(int i=0; i<(largo-1); i++) {
+        for(int o=0; o<(largo-(i+1)); o++) {
+                if(a[o] > a[o+1]) {
+                    int t = a[o];
+                    a[o] = a[o+1];
+                    a[o+1] = t;
+                }
+        }
+    }
+   int Promedio=(a[3]+a[4]+a[5]+a[6]+a[7])/5; 
+   return Promedio;
+}
+
+void values(){
+  
+  int FrontIrPulse[11];
+  int LeftIrPulse[11];
+  int RightIrPulse[11];
+  int BackIrPulse[11];
+  int ix=0;
+  
+  for(ix=0; ix<10; ix++){
+    FrontIrPulse[ix]=analogRead(qf);
+  }
+  for(ix=0; ix<10; ix++){
+    LeftIrPulse[ix]=analogRead(ql);
+  }
+  for(ix=0; ix<10; ix++){
+    RightIrPulse[ix]=analogRead(qr);
+  }
+  for(ix=0; ix<10; ix++){
+    BackIrPulse[ix]=analogRead(qb);
+  }
+  iFrontIr=prom(FrontIrPulse,11);
+  iLeftIr=prom(LeftIrPulse,11);
+  iRightIr=prom(RightIrPulse,11);
+  iBackIr=prom(BackIrPulse,11);
+  }
+  void printValues(){
+    Serial.print("Frontal= ");
+    Serial.print(iFrontIr);
+    Serial.print(" Left= ");
+    Serial.print(iLeftIr);
+    Serial.print(" Right= ");
+    Serial.print(iRightIr);
+    Serial.print(" Back= ");
+    Serial.println(iBackIr);
+  }
+  void interrupt(){
+    if(iFrontIr<100){
+     digitalWrite(s1,LOW);
+     delay(50);
+     digitalWrite(s1,HIGH);
+    }
+    if(iRightIr<100){
+     digitalWrite(s2,LOW);
+     delay(50);
+     digitalWrite(s2,HIGH);
+    }
+    if(iLeftIr<100){
+     digitalWrite(s3,LOW);
+     delay(50);
+     digitalWrite(s3,HIGH);
+    }
+    if(iBackIr<100){
+     digitalWrite(s4,LOW);
+     delay(50);
+     digitalWrite(s4,HIGH);
+    }
+  }
+  void loop(){
+  values();
+  interrupt();
+  printValues();
+  delay(500);
+}
