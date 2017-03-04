@@ -1,0 +1,68 @@
+iBall=0; //Posición de 
+void loop(){
+  Search();
+           ///// 1 2 3 \\\\\\
+           //// 12    4 \\\\\
+           //// 11    5 \\\\\
+           //// 10    6 \\\\\
+           ///// 9 8 7 \\\\\\           
+  switch (iBall){                              
+    case 1:                                       
+      movPers(90,100,90,100);                     
+      suck();
+      delay(200);
+      break;                              
+    case 2:                                       
+      goNorth();
+      movPers(100,100,100,100);
+      shoot();
+      break;                                      
+    case 3:
+      movPers(100,90,100,90);
+      suck();
+      delay(200);
+      break;
+    case 4:
+      movPers(95,-100,-100,90);
+      suck();
+      delay(200);
+      break;
+    case 5:
+      movPers(80,-100,-100,75);
+      delay(200);
+      break;
+    case 6:
+      movPers(-95,-100,-100,-90);
+      delay(200);
+      break;
+    case 7:
+      movPers(-100,100,100,-90);
+      delay(200);
+      break;
+    case 8:
+      movPers(100,-100,-100,90);
+      delay(200);
+      break;
+    case 9:
+      movPers(100,-100,-100,90);
+      delay(200);
+      break;
+    case 10:
+      movPers(100,-100,-100,90);
+      delay(200);
+      break;
+    case 11:
+      movPers(100,-100,-100,90);
+      delay(200);
+      break;
+    case 12:
+      movPers(100,-100,-100,90);
+      suck();
+      delay(200);
+      break;
+    default://NoPelota
+      movPers(-100,-100-10t30-100);
+      delay(100);
+      break;    
+  }
+}
