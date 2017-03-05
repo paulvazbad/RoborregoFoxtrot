@@ -1,4 +1,3 @@
-
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
@@ -10,30 +9,33 @@
 #define qa 19
 float DerD, IzqD, EnfrD, AtrasD;
 //Definiendo motores
-#define FrontMotorLeftS1 10
-#define FrontMotorLeftS2 11
-#define FrontMotorRightS1 6
-#define FrontMotorRightS2 7
-#define BackMotorLeftS1 9
-#define BackMotorLeftS2 8
-#define BackMotorRightS1 4
-#define BackMotorRightS2 5
-#define RodilloS1       3
-#define RodilloS2       2
+#define FrontMotorLeftS1 5
+#define FrontMotorLeftS2 4
+#define FrontMotorRightS1 11
+#define FrontMotorRightS2 10
+#define BackMotorLeftS1 6
+#define BackMotorLeftS2 7
+#define BackMotorRightS1 8
+#define BackMotorRightS2 9
+#define RodilloS1       13
+#define RodilloS2       12
 //Definiendo TSOPS
-#define FrontIr 22
-#define LeftIr 23
-#define RightIr 24
+#define FrontIr 24 //0
+//#define FrontLeftIr 27 //5
+//#define FrontRightIr 24 //2
+#define LeftIr 31 //3
+//#define LeftIrRight 26 //4
+//#define LeftIrLeft 23  //1
+#define RightIr 30
+//#define RightIrRight 29
+//#define RightIrLeft 30
 #define BackIr 25
-
-#define FrontLeftIr 26
-#define FrontRightIr 27
-#define BackLeftIr 28
+//#define BackLeftIr 32
+//#define BackRightIr 33
+#define BottonHacks 48
 
 //Inicialiando el IMU
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
-//Variable de posicion de la pelota global
-bool BallFront, BallLeft, BallRight, BallBack;
 /*
 dProm[0]=Enfrente
 dProm[1]=DerechaEnfrente
@@ -41,9 +43,10 @@ dProm[1]=DerechaEnfrente
 double dProm[7];
 
 void setup(void) {
+  delay(200);
   Serial.begin(9600);
   bno.begin();
-  delay(1000);
+  delay(50);
   bno.setExtCrystalUse(true);
   double dNorte=dGetDirect();
   Serial.println("El norte esta aqui amiguito: ");
@@ -53,11 +56,12 @@ void setup(void) {
   pinMode(qi,INPUT);
   pinMode(qa,INPUT);
   pinMode(qe,INPUT);
-  /*attachInterrupt(digitalPinToInterrupt(qe), INTERmoveBackward, LOW);
+/*  attachInterrupt(digitalPinToInterrupt(qe), INTERmoveBackward, LOW);
   attachInterrupt(digitalPinToInterrupt(qa), INTERmoveForward, LOW);
   attachInterrupt(digitalPinToInterrupt(qi), INTERmoveRight, LOW);
   attachInterrupt(digitalPinToInterrupt(qd), INTERmoveLeft, LOW);
-*/
+  */
+
   //Puentes H
   pinMode(FrontMotorLeftS1,OUTPUT);
   pinMode(FrontMotorLeftS2,OUTPUT);
@@ -72,145 +76,191 @@ void setup(void) {
   pinMode(RodilloS2, OUTPUT);
   //TSOPS
   pinMode(FrontIr,INPUT);
-  pinMode(LeftIr,INPUT);
+    pinMode(LeftIr,INPUT);
   pinMode(RightIr,INPUT);
   pinMode(BackIr,INPUT);
-
-  pinMode(FrontLeftIr,INPUT);
-  pinMode(FrontRightIr,INPUT);
-  pinMode(BackLeftIr,INPUT);
+  //pinMode(FrontLeftIr,INPUT);
+  //pinMode(FrontRightIr,INPUT);
+  /*pinMode(LeftIrLeft,INPUT);
+  pinMode(LeftIrRight,INPUT);
+  pinMode(RightIrLeft,INPUT);
+  pinMode(RightIrRight,INPUT);
+    pinMode(BackLeftIr,INPUT);
+  pinMode(BackRightIr,INPUT);
+  */
+  pinMode(12,OUTPUT);
+  digitalWrite(12, HIGH);
+  //Boton Hacks xdxd
+  pinMode(BottonHacks,INPUT);
+  //Inicialiando
+    movPers(90,90,85, 90);
+    delay(600);
+    goNorth();
+    movPers(90,90,85, 90);
+    delay(600);
   }
 
 void moveStay(){
-  digitalWrite(FrontMotorLeftS1,LOW);
-  digitalWrite(FrontMotorLeftS2,LOW);
-  digitalWrite(FrontMotorRightS1,LOW);
-  digitalWrite(FrontMotorRightS2,LOW);
-  digitalWrite(BackMotorLeftS1,LOW);
-  digitalWrite(BackMotorLeftS2,LOW);
-  digitalWrite(BackMotorRightS1,LOW);
-  digitalWrite(BackMotorRightS2,LOW);
+  analogWrite(FrontMotorLeftS1,LOW);
+  analogWrite(FrontMotorLeftS2,LOW);
+  analogWrite(FrontMotorRightS1,LOW);
+  analogWrite(FrontMotorRightS2,LOW);
+  analogWrite(BackMotorLeftS1,LOW);
+  analogWrite(BackMotorLeftS2,LOW);
+  analogWrite(BackMotorRightS1,LOW);
+  analogWrite(BackMotorRightS2,LOW);
 }
 //Funciones de interrupcion ---------------------------------------------------------------------------------------------
 void INTERmoveForward(){
   Serial.println("Se interrumpio esto");
   int pot=200;
   moveStay();
-  digitalWrite(FrontMotorLeftS1,pot);
-  digitalWrite(FrontMotorLeftS2,LOW);
-  digitalWrite(FrontMotorRightS1,LOW);
-  digitalWrite(FrontMotorRightS2,pot);
-  digitalWrite(BackMotorLeftS1,pot);
-  digitalWrite(BackMotorLeftS2,LOW);
-  digitalWrite(BackMotorRightS1,LOW);
-  digitalWrite(BackMotorRightS2,pot);
+  analogWrite(FrontMotorLeftS1,pot);
+  analogWrite(FrontMotorLeftS2,LOW);
+  analogWrite(FrontMotorRightS1,LOW);
+  analogWrite(FrontMotorRightS2,pot);
+  analogWrite(BackMotorLeftS1,pot);
+  analogWrite(BackMotorLeftS2,LOW);
+  analogWrite(BackMotorRightS1,LOW);
+  analogWrite(BackMotorRightS2,pot);
   delay(500);
 }
 void INTERmoveRight(){
   Serial.println("Se interrumpio esto");
   int pot=200;
   moveStay();
-  digitalWrite(FrontMotorLeftS1,pot);
-  digitalWrite(FrontMotorLeftS2,LOW);
-  digitalWrite(FrontMotorRightS1,pot);
-  digitalWrite(FrontMotorRightS2,LOW);
-  digitalWrite(BackMotorLeftS1,LOW);
-  digitalWrite(BackMotorLeftS2,pot);
-  digitalWrite(BackMotorRightS1,LOW);
-  digitalWrite(BackMotorRightS2,pot);
+  analogWrite(FrontMotorLeftS1,pot);
+  analogWrite(FrontMotorLeftS2,LOW);
+  analogWrite(FrontMotorRightS1,pot);
+  analogWrite(FrontMotorRightS2,LOW);
+  analogWrite(BackMotorLeftS1,LOW);
+  analogWrite(BackMotorLeftS2,pot);
+  analogWrite(BackMotorRightS1,LOW);
+  analogWrite(BackMotorRightS2,pot);
+  delay(500);
 }
 void INTERmoveBackward(){
   Serial.println("Se interrumpio esto");
   moveStay();
   int pot=200;
-  digitalWrite(FrontMotorLeftS1,LOW);
-  digitalWrite(FrontMotorLeftS2,pot);
-  digitalWrite(FrontMotorRightS1,pot);
-  digitalWrite(FrontMotorRightS2,LOW);
-
-  digitalWrite(BackMotorLeftS1,LOW);
-  digitalWrite(BackMotorLeftS2,pot);
-  digitalWrite(BackMotorRightS1,pot);
-  digitalWrite(BackMotorRightS2,LOW);
+  analogWrite(FrontMotorLeftS1,LOW);
+  analogWrite(FrontMotorLeftS2,pot);
+  analogWrite(FrontMotorRightS1,pot);
+  analogWrite(FrontMotorRightS2,LOW);
+  analogWrite(BackMotorLeftS1,LOW);
+  analogWrite(BackMotorLeftS2,pot);
+  analogWrite(BackMotorRightS1,pot);
+  analogWrite(BackMotorRightS2,LOW);
   delay(500);
 }
 void INTERmoveLeft(){
   Serial.println("Se interrumpio esto");
   int pot=200;
   moveStay();
-  digitalWrite(FrontMotorLeftS1,LOW);
-  digitalWrite(FrontMotorLeftS2,pot);
-  digitalWrite(FrontMotorRightS1,LOW);
-  digitalWrite(FrontMotorRightS2,pot);
-  digitalWrite(BackMotorLeftS1,pot);
-  digitalWrite(BackMotorLeftS2,LOW);
-  digitalWrite(BackMotorRightS1,pot);
-  digitalWrite(BackMotorRightS2,LOW);
+  analogWrite(FrontMotorLeftS1,LOW);
+  analogWrite(FrontMotorLeftS2,pot);
+  analogWrite(FrontMotorRightS1,LOW);
+  analogWrite(FrontMotorRightS2,pot);
+  analogWrite(BackMotorLeftS1,pot);
+  analogWrite(BackMotorLeftS2,LOW);
+  analogWrite(BackMotorRightS1,pot);
+  analogWrite(BackMotorRightS2,LOW);
   delay(500);
   }
 
 //----------------------------------------------------------------------------------------------------------------------
 //Funcion de movimiento ------------------------------------------------------------------------------------------------
 void shoot(){
-  digitalWrite(RodilloS1,HIGH);
-  digitalWrite(RodilloS2,LOW);
+  analogWrite(RodilloS1,HIGH);
+  analogWrite(RodilloS2,LOW);
 }
 void  suck() {
-  digitalWrite(RodilloS1,LOW);
-  digitalWrite(RodilloS2,HIGH);
+  analogWrite(RodilloS1,LOW);
+  analogWrite(RodilloS2,HIGH);
 }
 void  stopR() {
   analogWrite(RodilloS1,LOW);
   analogWrite(RodilloS2,LOW);
 }
 
-void moveForward(int pot, int tiempo){
+void moveForward(int pot, double dOrientacionIni){
   moveStay();
-  digitalWrite(FrontMotorLeftS1,pot);
-  digitalWrite(FrontMotorLeftS2,LOW);
-  digitalWrite(FrontMotorRightS1,LOW);
-  digitalWrite(FrontMotorRightS2,pot);
-  digitalWrite(BackMotorLeftS1,pot);
-  digitalWrite(BackMotorLeftS2,LOW);
-  digitalWrite(BackMotorRightS1,LOW);
-  digitalWrite(BackMotorRightS2,pot);
-  delay(tiempo);
+  Serial.print("La actual: ");
+  Serial.println(dGetDirect());
+
+  if(dGetDirect()>180){
+    double dDif = dGetDirect()-dOrientacionIni+2;
+    Serial.println("Aumento el lado derecho");
+    analogWrite(FrontMotorRightS1,LOW);
+    analogWrite(FrontMotorRightS2,pot);
+    analogWrite(BackMotorRightS1,LOW);
+    analogWrite(BackMotorRightS2,pot);
+    analogWrite(FrontMotorLeftS1,100);
+    analogWrite(FrontMotorLeftS2,LOW);
+    analogWrite(BackMotorLeftS1,100);
+    analogWrite(BackMotorLeftS2,LOW);
+    //Aumentar lado derecho
+  }
+  else if(dGetDirect()<180){
+  //Aumentar lado izquierda
+  Serial.println("Aumento el lado izquierdo");
+  analogWrite(FrontMotorLeftS1,pot);
+  analogWrite(FrontMotorLeftS2,LOW);
+  analogWrite(FrontMotorRightS1,LOW);
+  analogWrite(FrontMotorRightS2,100);
+  analogWrite(BackMotorLeftS1,pot);
+  analogWrite(BackMotorLeftS2,LOW);
+  analogWrite(BackMotorRightS1,LOW);
+  analogWrite(BackMotorRightS2,0);
+  }
+  else{
+    Serial.println("Me mantengo derecho");
+    analogWrite(FrontMotorLeftS1,pot);
+    analogWrite(FrontMotorLeftS2,LOW);
+    analogWrite(FrontMotorRightS1,LOW);
+    analogWrite(FrontMotorRightS2,pot);
+    analogWrite(BackMotorLeftS1,pot);
+    analogWrite(BackMotorLeftS2,LOW);
+    analogWrite(BackMotorRightS1,LOW);
+    analogWrite(BackMotorRightS2,pot);
+    //Moverse hacia el frente
+  }
 }
 void moveRight(int pot, int tiempo){
   moveStay();
-  digitalWrite(FrontMotorLeftS1,pot);
-  digitalWrite(FrontMotorLeftS2,LOW);
-  digitalWrite(FrontMotorRightS1,pot);
-  digitalWrite(FrontMotorRightS2,LOW);
-  digitalWrite(BackMotorLeftS1,LOW);
-  digitalWrite(BackMotorLeftS2,pot);
-  digitalWrite(BackMotorRightS1,LOW);
-  digitalWrite(BackMotorRightS2,pot);
+  analogWrite(FrontMotorLeftS1,pot);
+  analogWrite(FrontMotorLeftS2,LOW);
+  analogWrite(FrontMotorRightS1,pot);
+  analogWrite(FrontMotorRightS2,LOW);
+  analogWrite(BackMotorLeftS1,LOW);
+  analogWrite(BackMotorLeftS2,pot);
+  analogWrite(BackMotorRightS1,LOW);
+  analogWrite(BackMotorRightS2,pot);
   delay(tiempo);
 }
 void moveLeft(int pot, int tiempo){
   moveStay();
-  digitalWrite(FrontMotorLeftS1,LOW);
-  digitalWrite(FrontMotorLeftS2,pot);
-  digitalWrite(FrontMotorRightS1,LOW);
-  digitalWrite(FrontMotorRightS2,pot);
-  digitalWrite(BackMotorLeftS1,pot);
-  digitalWrite(BackMotorLeftS2,LOW);
-  digitalWrite(BackMotorRightS1,pot);
-  digitalWrite(BackMotorRightS2,LOW);
+  analogWrite(FrontMotorLeftS1,LOW);
+  analogWrite(FrontMotorLeftS2,pot);
+  analogWrite(FrontMotorRightS1,LOW);
+  analogWrite(FrontMotorRightS2,pot);
+  analogWrite(BackMotorLeftS1,pot);
+  analogWrite(BackMotorLeftS2,LOW);
+  analogWrite(BackMotorRightS1,pot);
+  analogWrite(BackMotorRightS2,LOW);
   delay(tiempo);
   }
 void moveBackward(int pot, int tiempo){
   moveStay();
-  digitalWrite(FrontMotorLeftS1,LOW);
-  digitalWrite(FrontMotorLeftS2,pot);
-  digitalWrite(FrontMotorRightS1,pot);
-  digitalWrite(FrontMotorRightS2,LOW);
+  analogWrite(FrontMotorLeftS1,LOW);
+  analogWrite(FrontMotorLeftS2,pot);
+  analogWrite(FrontMotorRightS1,pot);
+  analogWrite(FrontMotorRightS2,LOW);
 
-  digitalWrite(BackMotorLeftS1,LOW);
-  digitalWrite(BackMotorLeftS2,pot);
-  digitalWrite(BackMotorRightS1,pot);
-  digitalWrite(BackMotorRightS2,LOW);
+  analogWrite(BackMotorLeftS1,LOW);
+  analogWrite(BackMotorLeftS2,pot);
+  analogWrite(BackMotorRightS1,pot);
+  analogWrite(BackMotorRightS2,LOW);
   delay(tiempo);
 }
 void movPers(int p1,int p2, int p3, int p4){
@@ -218,6 +268,7 @@ void movPers(int p1,int p2, int p3, int p4){
   int fR=p2;
   int bL=p3;
   int bR=p4;
+  moveStay();
   //FrontLeft--------------------------------
   if(fL>=0){
   fL=constrain(fL,0,100);
@@ -275,19 +326,27 @@ void movPers(int p1,int p2, int p3, int p4){
   analogWrite(BackMotorRightS2,LOW);
   }
 }
+void goNorth(){
+  Serial.println("Me posiciono hacia la porteria");
+  moveStay();
+  double dOrientacionAct=dGetDirect();
+  while(dOrientacionAct>180 && dOrientacionAct<175){
+      movPers(-30, 30, -30, 30);
+      dOrientacionAct = dGetDirect();
+  }
+}
 void turnRight(int dOrientacionGrados){
   Serial.println("Entre a la vuelta derecha");
   double pot=200;
   moveStay();
   double dOrientacionAct=dGetDirect();
-  double dOrientacionIni=dOrientacionAct;
   double dOrientacionF=dOrientacionAct+dOrientacionGrados;
   if(dOrientacionF<=360){
     while(dOrientacionAct<=dOrientacionF){
       dOrientacionAct=dGetDirect();
       Serial.println("NO El angulo a girar excede de los 360");
       delay(500);
-      pot = dOrientacionF-dOrientacionAct;
+      pot = dOrientacionF-dOrientacionAct+110;
       Serial.print("La potencia es de: ");
       Serial.println(pot);
      digitalWrite(FrontMotorLeftS1,pot);
@@ -306,6 +365,7 @@ void turnRight(int dOrientacionGrados){
    while(dOrientacionAct<=360 && dOrientacionAct!=0 ){
      //Potencia original
      dOrientacionAct=dGetDirect();
+     pot=200;
      Serial.print("La potencia es de: ");
      Serial.println(pot);
      Serial.println(dOrientacionAct);
@@ -321,7 +381,7 @@ void turnRight(int dOrientacionGrados){
     }
    while(dOrientacionAct<=dSobrante){
      dOrientacionAct=dGetDirect();
-     pot=  dOrientacionF-dOrientacionAct;
+     pot=  dOrientacionF-dOrientacionAct+110;
      Serial.print("La potencia es de: ");
      Serial.println(pot);
      digitalWrite(FrontMotorLeftS1,pot);
@@ -342,22 +402,20 @@ void turnLeft(int dOrientacionGrados){
   double pot=200;
   moveStay();
   double dOrientacionAct=dGetDirect();
-  double dOrientacionIni=dOrientacionAct;
   double dOrientacionF=dOrientacionAct-dOrientacionGrados;
   if(dOrientacionF>=0){
     while(dOrientacionAct>dOrientacionF){
        dOrientacionAct=dGetDirect();
-       pot = dOrientacionAct-dOrientacionF;
        Serial.print("La potencia es de: ");
        Serial.println(pot);
-       digitalWrite(FrontMotorLeftS1,LOW);
-       digitalWrite(FrontMotorLeftS2,pot);
-       digitalWrite(FrontMotorRightS1,LOW);
-       digitalWrite(FrontMotorRightS2,pot);
-       digitalWrite(BackMotorLeftS1,LOW);
-       digitalWrite(BackMotorLeftS2,pot);
-       digitalWrite(BackMotorRightS1,LOW);
-       digitalWrite(BackMotorRightS2,pot);
+       analogWrite(FrontMotorLeftS1,LOW);
+       analogWrite(FrontMotorLeftS2,pot);
+       analogWrite(FrontMotorRightS1,LOW);
+       analogWrite(FrontMotorRightS2,pot);
+       analogWrite(BackMotorLeftS1,LOW);
+       analogWrite(BackMotorLeftS2,pot);
+       analogWrite(BackMotorRightS1,LOW);
+       analogWrite(BackMotorRightS2,pot);
      }
   }
   else{
@@ -365,107 +423,179 @@ void turnLeft(int dOrientacionGrados){
     while(dOrientacionAct>=0 && dOrientacionAct!=360){
       //POtencia original
        dOrientacionAct=dGetDirect();
-       digitalWrite(FrontMotorLeftS1,LOW);
-       digitalWrite(FrontMotorLeftS2,pot);
-       digitalWrite(FrontMotorRightS1,LOW);
-       digitalWrite(FrontMotorRightS2,pot);
-       digitalWrite(BackMotorLeftS1,LOW);
-       digitalWrite(BackMotorLeftS2,pot);
-       digitalWrite(BackMotorRightS1,LOW);
-       digitalWrite(BackMotorRightS2,pot);
+       Serial.print("La potencia es de: ");
+       Serial.println(pot);
+       analogWrite(FrontMotorLeftS1,LOW);
+       analogWrite(FrontMotorLeftS2,pot);
+       analogWrite(FrontMotorRightS1,LOW);
+       analogWrite(FrontMotorRightS2,pot);
+       analogWrite(BackMotorLeftS1,LOW);
+       analogWrite(BackMotorLeftS2,pot);
+       analogWrite(BackMotorRightS1,LOW);
+       analogWrite(BackMotorRightS2,pot);
      }
      while(dOrientacionAct>dSobrante){
        dOrientacionAct=dGetDirect();
        pot = dSobrante;
-       digitalWrite(FrontMotorLeftS1,LOW);
-       digitalWrite(FrontMotorLeftS2,pot);
-       digitalWrite(FrontMotorRightS1,LOW);
-       digitalWrite(FrontMotorRightS2,pot);
-       digitalWrite(BackMotorLeftS1,LOW);
-       digitalWrite(BackMotorLeftS2,pot);
-       digitalWrite(BackMotorRightS1,LOW);
-       digitalWrite(BackMotorRightS2,pot);
+       Serial.print("La potencia es de: ");
+       Serial.println(pot);
+       analogWrite(FrontMotorLeftS1,LOW);
+       analogWrite(FrontMotorLeftS2,pot);
+       analogWrite(FrontMotorRightS1,LOW);
+       analogWrite(FrontMotorRightS2,pot);
+       analogWrite(BackMotorLeftS1,LOW);
+       analogWrite(BackMotorLeftS2,pot);
+       analogWrite(BackMotorRightS1,LOW);
+       analogWrite(BackMotorRightS2,pot);
      }
    }
   }
-
-  
-  
   //-----------------------------------------------------------------------------------------------------------------------------------------------
   //TSOPS ------------------------------------------------------------------------------------------------------------------------------------------
-void prom(double a[][29], int largo) {
-  for(int iNumT=22; iNumT<29; iNumT++){
-    for(int i=0; i<(largo-1); i++) {
-        for(int o=0; o<(largo-(i+1)); o++) {
-                if(a[iNumT][o] > a[iNumT][o+1]) {
-                    double t = a[iNumT][o];
-                    a[iNumT][o] = a[iNumT][o+1];
-                    a[iNumT][o+1] = t;
-                }
+int IrValues(){
+  double a[50];
+    //El Enfrente
+  double dValores=0;
+  for(int iX=0; iX<5; iX++){
+      dValores+=pulseIn(24,LOW,25000);
+      }
+  dValores=dValores/5;
+  a[0]=dValores;
+  //*************************
+  //EL Atras
+  dValores=0;
+  for(int iX=0; iX<5; iX++){
+      dValores+=pulseIn(25,LOW,25000);
+    }
+    dValores=dValores/5;
+    a[1]=dValores;
+  //El Derecha
+  dValores=0;
+  for(int iX=0; iX<5; iX++){
+      dValores+=pulseIn(30,LOW,25000);
+    }
+    dValores=dValores/5;
+    a[2]=dValores;
+    //EL izquierda
+    dValores=0;
+    for(int iX=0; iX<5; iX++){
+        dValores+=pulseIn(31,LOW,25000);
+      }
+      dValores=dValores/5;
+      a[3]=dValores;
+      double dMayor=0;
+      int iTSOP=0;
+      for(int iY=0;iY<4; iY++){
+        if(a[iY]>dMayor){
+          Serial.print(iY);
+          dMayor=a[iY];
+          iTSOP=iY;
         }
-    }
+      }
+      if(dMayor<100){
+        iTSOP= -1;
+      }
 
-   double dPromedio=(a[iNumT][1]+a[iNumT][2]+a[iNumT][3]+a[iNumT][4]+a[iNumT][5])/5;
-   dProm[iNumT]=dPromedio;
- }
-}
-void IrValues(){
-  //Col 0 = Lecturas 1
-  //Renglon 0 TSOP 1
-  bool BallFront, BallLeft, BallRight, BallBack;
-  double MatLec[29][29];
-
-  for(int iNumT=22; iNumT<29; iNumT++){
-    for(int iLect=0; iLect<7; iLect++){
-        MatLec[iNumT][iLect]=pulseIn(iNumT,LOW);
-    }
-  }
-  prom(MatLec,7);
-}
-
-void IrBalls(){
-  if(dProm[0]>=280 && dProm[0]<=350){
-    BallFront=true;
-  }
-  else {
-    BallFront=false;
-  }
-  if(dProm[1]>=280 && dProm[1]<=350){
-    BallLeft=true;
-  }
-  else{
-    BallLeft=false;
-  }
-  if(dProm[2]>=280 && dProm[2]<=350){
-    BallRight=true;
-  }
-  else{
-    BallRight=false;
-  }
-  if(dProm[3]>=280 && dProm[3]<=350){
-    BallBack=true;
-  }
-  else{
-    BallBack=false;
-  }
-
+    Serial.print("La posicion de la pelota es en: ");
+    Serial.println(iTSOP);
+    Serial.print("Con la intensidad prom de:");
+    Serial.println(dMayor);
+//Reiniciar aqui
+    return iTSOP;
 }
 //---------------------------------------------------------------------------------------------------------------
 double dGetDirect(){
   sensors_event_t event;
   bno.getEvent(&event);
   double dOrientacionAct=event.orientation.x;
-  delay(500);
+  if(dOrientacionAct<180){
+    dOrientacionAct=dOrientacionAct+180;
+  }
+  else{
+    dOrientacionAct=dOrientacionAct-180;
+  }
   return dOrientacionAct;
-
-
 }
 void loop(){
   Serial.println(dGetDirect());
-  if(Serial.read()=='l'){
-    turnLeft(100);
-  }
-  else if(Serial.read()=='r'){
-    turnRight(100);
+  int iBall=-1; //Posición de
+  iBall= IrValues();
+  Serial.println(iBall);
+  /*
+           ///// 1 2 3 \\\\\\
+           //// 12    4 \\\\\
+        /////// 10    6 \\\\\
+           ///// 9 8 7 \\\\\
+*/
+double dgrados=180;
+  switch (iBall){
+    case 0:
+    //La bola se encuentra enfrente
+      movPers(50,55,45, 55);
+    //  goNorth();
+      delay(500);
+      break;
+    case 1:
+    //La bola se encuent atras.
+    //1ero la espiral del movimiento hacia la derecha.
+      dgrados=dGetDirect();
+      if(dgrados>=345 && dgrados<=15){
+        movPers(-50,-45,-45,-50);
+        delay(800);
+        movPers(50,45,45,50);
+        delay(400);
+      }
+      else{
+        movPers(-65,65,65,-65);
+        delay(500);
+        goNorth();
+        movPers(-65,-65,-65,-65);
+        delay(500);
+        movPers(65,-65,-65,65);
+        delay(500);
+        goNorth();
+      }
+      break;
+    case 2:
+    //La bola se encuentra en la derecha.
+    dgrados=dGetDirect();
+    if(dgrados>=255 && dgrados<=285){
+      movPers(50,-45,-45,50);
+      delay(800);
+      movPers(-50,45,45,-50);
+      delay(400);
+    }
+    else{
+      movPers(-50,-50,-50,-50);
+      delay(500);
+      movPers(50,-50,-50,50);
+      delay(500);
+    }
+      break;
+    case 3:
+    //La bola se encuentra a la izquierda
+    dgrados=dGetDirect();
+    if(dgrados>=75 && dgrados<=105){
+      movPers(-50,45,45,-50);
+      delay(800);
+      movPers(50,-45,-45,50);
+      delay(400);
+    }
+    else{
+      movPers(-50,-50,-50,-50);
+      delay(500);
+      movPers(-50,50,50,-50);
+      delay(500);
+    }
+      break;
+    case -1:
+      movPers(-30,30,-30,30);
+      //digitalWrite(12, LOW);
+      break;
+
+      //digitalWrite(12, HIGH);
+
+
+
   }
 }
