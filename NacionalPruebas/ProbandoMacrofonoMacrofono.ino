@@ -214,6 +214,18 @@ void goBall(){
   Serial.println(potDer);
   delay(1);  
 }
+void goNorth(){
+  potIzq=map(dGetDirect(),360,180,40,80);
+  potDer=map(dGetDirect(),0,180,40,80);  
+  potIzq=constrain(potIzq,40,80);
+  potDer=constrain(potDer,40,80);
+  movPers(potIzq,potDer,potIzq,potDer);
+  Serial.print(potIzq);
+  Serial.print("  , potDer= ");
+  Serial.println(potDer);
+  delay(1);  
+}
+
 
 void loop(){
   
@@ -223,22 +235,24 @@ void loop(){
     Serial.println("Si veo");
     if(area<30000){
       Serial.println("Si esta lejos");
-      while(area<30000){
-        if(blocks==0){
-          break;
-        }
+      while(area<30000 && blocks!=0){
         Serial.println("Si quiero ir a la bola");
         info();
         goBall();
-        spinBallNor();
       }
-      Serial.println("ya no esta lejos");
     }
+    if(area>30000){
+        if(dGetDirect()<170 && dGetDirect()>190);
+        spinBallNor();
+        Serial.println("ya no esta lejos");
+        }
+        else{
+          goNorth();
+        }
   }
   else{
     movPers(40,-40,40,-40);
     delay(1);
   }
 }
-
 
