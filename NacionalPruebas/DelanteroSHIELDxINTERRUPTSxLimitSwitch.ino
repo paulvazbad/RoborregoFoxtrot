@@ -331,14 +331,16 @@ void loop(){
       
         Serial.println(dGetDirect());
         if(dGetDirect()<175 || dGetDirect()>190){
-          Serial.println("ya no esta lejos");
-          Serial.println(dGetDirect());
-          Serial.print("El area es: ");
-          Serial.println(area);
-          Serial.println(altura);
-          Serial.println(anchura);
-          spinBallNor();
-          spinNorth();
+          while(digitalRead(push)==1){
+            Serial.println("ya no esta lejos");
+            Serial.println(dGetDirect());
+            Serial.print("El area es: ");
+            Serial.println(area);
+            Serial.println(altura);
+            Serial.println(anchura);
+            spinBallNor();
+            spinNorth();
+          }
         }
         else  if(dGetDirect()>170 && dGetDirect()<190){
           while(digitalRead(push)==1){
