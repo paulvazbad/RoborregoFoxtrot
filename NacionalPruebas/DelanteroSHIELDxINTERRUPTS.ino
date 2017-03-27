@@ -8,6 +8,7 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 //Definiendo motores
+Adafruit_MotorShield AdaShield = Adafruit_MotorShield();
 Adafruit_DCMotor *FrontLeft = AdaShield.getMotor(1);
 Adafruit_DCMotor *FrontRight = AdaShield.getMotor(3);
 Adafruit_DCMotor *BackLeft = AdaShield.getMotor(2);
@@ -19,7 +20,7 @@ Adafruit_DCMotor *BackRight = AdaShield.getMotor(4);
 //Inicialiando el IMU
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 //Inicializando el shield
-Adafruit_MotorShield AdaShield = Adafruit_MotorShield();
+
 //Variables Potencia
 double potDer=0;
 double potIzq=0;
@@ -34,6 +35,19 @@ int anchura=0;
 bool ultPos=0;
 Pixy pixy;
 
+double dGetDirect(){
+sensors_event_t event;
+bno.getEvent(&event);
+double dOrientacionAct=event.orientation.x;
+delay(100);
+if(dOrientacionAct<180){
+  dOrientacionAct=dOrientacionAct+180;
+}
+else if(dOrientacionAct>=180){
+  dOrientacionAct=dOrientacionAct-180;
+}
+return dOrientacionAct;
+}
 
 void setup(void) {
   pixy.init();
@@ -50,37 +64,25 @@ void setup(void) {
   pinMode(colorLeft,INPUT);
   pinMode(colorRight,INPUT);
   delay(1000);
-  
+
   }
 
   void checkColor(){
     if(digitalRead(colorLeft)==1 && digitalRead(colorRight)==1){
       movPers(-80,-80,-80,-80);
-      delay(800);      
+      delay(800);
     }
     if(digitalRead(colorLeft)==1){
       movPers(80,-80,-80,80);
-      delay(800);      
+      delay(800);
     }
     if(digitalRead(colorRight)==1){
       movPers(-80,80,80,-80);
-      delay(800);      
-    }    
+      delay(800);
+    }
   }
-  
-  double dGetDirect(){
-  sensors_event_t event;
-  bno.getEvent(&event);
-  double dOrientacionAct=event.orientation.x;
-  delay(100);
-  if(dOrientacionAct<180){
-    dOrientacionAct=dOrientacionAct+180;
-  }
-  else if(dOrientacionAct>=180){
-    dOrientacionAct=dOrientacionAct-180;
-  }
-  return dOrientacionAct;
-}
+
+
 
 void displayCalStatus(void)
 {
@@ -90,14 +92,14 @@ void displayCalStatus(void)
   uint8_t system, gyro, accel, mag;
   system = gyro = accel = mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
- 
+
   /* The data should be ignored until the system calibration is > 0 */
   Serial.print("\t");
   if (!system)
   {
     Serial.print("! ");
   }
- 
+
   /* Display the individual values */
   Serial.print("Sys:");
   Serial.print(system, DEC);
@@ -170,7 +172,7 @@ void spinBallNor(){
     while(dNorti<175){
     dNorti=dGetDirect();
     movPers(0,57,80,-75);
-    checkColor(); 
+    checkColor();
     }
   }
    else if(dNorti>180){
@@ -213,10 +215,10 @@ void spinNorth(){
   if(dNorti<170){
     while(dNorti<175){
     dNorti=dGetDirect();
-    Serial.println(dNorti);  
+    Serial.println(dNorti);
     movPers(20,-20,20,-20);
     delay(1);
-    checkColor(); 
+    checkColor();
     }
     //moveFrenos();
     //movPers(80,80,80,80);
@@ -226,8 +228,8 @@ void spinNorth(){
   else if(dNorti>190){
     while(dNorti>185){
       dNorti=dGetDirect();
-      Serial.println(dNorti);  
-      movPers(-20,20,-20,20);  
+      Serial.println(dNorti);
+      movPers(-20,20,-20,20);
       delay(1);
       checkColor();
     }
@@ -237,22 +239,22 @@ void spinNorth(){
     moveStay();
   }
 }
-  
+
 
 
 void info() {
-  blocks= pixy.getBlocks();  
+  blocks= pixy.getBlocks();
   cordx= pixy.blocks[0].x;  //0-319
   cordy= pixy.blocks[0].y;  //0-199
   altura= pixy.blocks[0].height;
   anchura=pixy.blocks[0].width;
   area= (altura)*(anchura);
   dist=map(area,81,63481,182,1);
-} 
+}
 void checar(){
   static int i = 0;
   int j;
-  uint16_t blocks;  
+  uint16_t blocks;
   blocks = pixy.getBlocks();
   if (blocks==1)
   {
@@ -275,34 +277,34 @@ void checar(){
       Serial.println(dist);
       i=0;
     }
-  }  
+  }
 }
 
 void goBall(){
   potIzq=map(cordx,0,150,40,80);
-  potDer=map(cordx,319,170,40,80);  
+  potDer=map(cordx,319,170,40,80);
   potIzq=constrain(potIzq,40,80);
   potDer=constrain(potDer,40,80);
   movPers(potIzq,potDer,potIzq,potDer);
-  delay(1);  
+  delay(1);
 }
 
 void goNorth(){
   potIzq=map(dGetDirect(),360,180,40,80);
-  potDer=map(dGetDirect(),0,180,40,80);  
+  potDer=map(dGetDirect(),0,180,40,80);
   potIzq=constrain(potIzq,40,80);
   potDer=constrain(potDer,40,80);
   movPers(potIzq,potDer,potIzq,potDer);
-  delay(1);  
+  delay(1);
 }
 
 void loop(){
-  
- 
+
+
   Serial.println(dGetDirect());
   displayCalStatus();
 
-  
+
 }
 
 /*
@@ -334,7 +336,7 @@ void loop(){
 /*
 //              ALGORITMO ORIGINAL
 void loop(){
-  
+
    info();
    checkColor();
    if(blocks==1){
@@ -350,7 +352,7 @@ void loop(){
       }
     }
     if(area>30000){
-      
+
         Serial.println(dGetDirect());
         if(dGetDirect()<175 || dGetDirect()>190){
           Serial.println("ya no esta lejos");
@@ -377,12 +379,12 @@ void loop(){
      else{
       ultPos=false;
      }
-    
+
   }
   else{
     if(ultPos==true){
     movPers(-40,40,-40,40);
-    delay(1);  
+    delay(1);
     }
     else{
     movPers(40,-40,40,-40);
