@@ -56,15 +56,15 @@ void values(){
   void interrupt(){
     if(iLeftIr<850){
      Serial.println("IZQ");
-     digitalWrite(intIzq,LOW);
-     delay(100);
      digitalWrite(intIzq,HIGH);
+     delay(100);
+     digitalWrite(intIzq,LOW);
     }
     if(iRightIr<850){      
      Serial.println("DER");
-     digitalWrite(intDer,LOW);
-     delay(100);
      digitalWrite(intDer,HIGH);
+     delay(100);
+     digitalWrite(intDer,LOW);
     }
   }
 
