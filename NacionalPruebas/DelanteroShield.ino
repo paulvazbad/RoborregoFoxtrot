@@ -156,6 +156,7 @@ void movPers(int p1,int p2, int p3, int p4){
       BackRight->run(BACKWARD);
 
     }
+  moveStay();
  }
 //                       SPIN ORIGINAL
 void spinBallNor(){
