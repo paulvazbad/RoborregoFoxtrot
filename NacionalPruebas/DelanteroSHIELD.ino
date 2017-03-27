@@ -7,6 +7,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
+Adafruit_MotorShield AdaShield = Adafruit_MotorShield();
 //Definiendo motores
 Adafruit_DCMotor *FrontLeft = AdaShield.getMotor(1);
 Adafruit_DCMotor *FrontRight = AdaShield.getMotor(3);
@@ -17,7 +18,7 @@ Adafruit_DCMotor *BackRight = AdaShield.getMotor(4);
 //Inicialiando el IMU
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 //Inicializando el shield
-Adafruit_MotorShield AdaShield = Adafruit_MotorShield();
+
 //Variables Potencia
 double potDer=0;
 double potIzq=0;
@@ -47,24 +48,11 @@ void setup(void) {
   AdaShield.begin();
   pinMode(RodilloS1, OUTPUT);
   pinMode(RodilloS2, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(18),interruptLeft , LOW);  
-  attachInterrupt(digitalPinToInterrupt(19),interruptRight , LOW);
-
   delay(1000);
   
   }
 
-  void interruptLeft(){
-    while(){
-      
-    }    
-  }
-  void interruptLeft(){
-    
-
-    
-  }  
-  double dGetDirect(){
+double dGetDirect(){
   sensors_event_t event;
   bno.getEvent(&event);
   double dOrientacionAct=event.orientation.x;
