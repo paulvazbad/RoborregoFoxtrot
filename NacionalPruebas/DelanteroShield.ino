@@ -3,17 +3,17 @@
 #include <SPI.h>
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
-
+//Paul Vazquez
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 //Inicializando el shield
 Adafruit_MotorShield AdaShield = Adafruit_MotorShield();
 //Definiendo motores
-Adafruit_DCMotor *FrontLeft = AdaShield.getMotor(1);
-Adafruit_DCMotor *FrontRight = AdaShield.getMotor(3);
-Adafruit_DCMotor *BackLeft = AdaShield.getMotor(2);
-Adafruit_DCMotor *BackRight = AdaShield.getMotor(4);
+Adafruit_DCMotor *FrontRight = AdaShield.getMotor(1);
+Adafruit_DCMotor *FrontLeft = AdaShield.getMotor(3);
+Adafruit_DCMotor *BackLeft = AdaShield.getMotor(4);
+Adafruit_DCMotor *BackRight = AdaShield.getMotor(2);
 #define RodilloS1       13
 #define RodilloS2       12
 //Inicialiando el IMU
@@ -49,8 +49,7 @@ void setup(void) {
   AdaShield.begin();
   pinMode(RodilloS1, OUTPUT);
   pinMode(RodilloS2, OUTPUT);
-
-    delay(8000);
+  delay(8000);
 
   }
 
@@ -96,19 +95,11 @@ void displayCalStatus(void)
 }
 
 void moveStay(){
-  FrontLeft->run(BRAKE);
-  FrontRight->run(BRAKE);
-  BackRight->run(BRAKE);
-  BackLeft->run(BRAKE);
+  FrontLeft->run(RELEASE);
+  FrontRight->run(RELEASE);
+  BackRight->run(RELEASE);
+  BackLeft->run(RELEASE);
  }
-
- void moveFrenos(){
-   FrontLeft->run(RELEASE);
-   FrontRight->run(RELEASE);
-   BackRight->run(RELEASE);
-   BackLeft->run(RELEASE);
- }
-
 void movPers(int p1,int p2, int p3, int p4){
     int fL=p1;
     int fR=p2;
@@ -154,7 +145,6 @@ void movPers(int p1,int p2, int p3, int p4){
       BackRight->run(BACKWARD);
 
     }
-  moveStay();
  }
 //                       SPIN ORIGINAL
 void spinBallNor(){
@@ -227,8 +217,6 @@ void spinNorth(){
   }
 }
 
-
-
 void info() {
   blocks= pixy.getBlocks();
   cordx= pixy.blocks[0].x;  //0-319
@@ -286,12 +274,10 @@ void goNorth(){
 }
 
 void loop(){
-
-
-  Serial.println(dGetDirect());
-  displayCalStatus();
-
-
+  movPers(20, 20, 20, 20);
+  delay(1500);
+  moveStay();
+  delay(200);
 }
 
 /*
