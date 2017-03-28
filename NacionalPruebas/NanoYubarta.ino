@@ -1,7 +1,9 @@
-#define izq 4
-#define der 5
-#define intIzq 3
-#define intDer 2
+#define izq 10
+#define der 11
+#define intIzq 4
+#define intDer 5
+#define intBack 6
+
 int iLeftIr = 0;
 int iRightIr = 0;
 
@@ -54,13 +56,19 @@ void values(){
     Serial.println(iRightIr);
   }
   void interrupt(){
-    if(iLeftIr<850){
+    if(iLeftIr<550&&iRightIr<400){
+     Serial.println("BACK");
+     digitalWrite(intBack,LOW);
+     delay(100);
+     digitalWrite(intBack,HIGH);     
+    }    
+    if(iLeftIr<550){
      Serial.println("IZQ");
      digitalWrite(intIzq,LOW);
      delay(100);
      digitalWrite(intIzq,HIGH);
     }
-    if(iRightIr<850){      
+    if(iRightIr<400){      
      Serial.println("DER");
      digitalWrite(intDer,LOW);
      delay(100);
