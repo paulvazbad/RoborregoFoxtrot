@@ -428,6 +428,7 @@ void loop(){
 
   }
   else{
+    moveStay();
     if(ultPos==true){
     movePers(-40,40,-40,80);
     delay(1);
