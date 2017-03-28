@@ -6,22 +6,25 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 //Definiendo motores
-#define FrontMotorLeftS1 6
-#define FrontMotorLeftS2 5
-#define FrontMotorRightS1 12
-#define FrontMotorRightS2 11
-#define BackMotorLeftS1 7
-#define BackMotorLeftS2 8
-#define BackMotorRightS1 9
-#define BackMotorRightS2 10
-#define RodilloS1       13
-#define RodilloS2       12
+#define FrontMotorLeftS1 5
+#define FrontMotorLeftS2 6
+#define FrontMotorRightS1 9
+#define FrontMotorRightS2 10
+#define BackMotorLeftS1  7
+#define BackMotorLeftS2  8
+#define BackMotorRightS1 11
+#define BackMotorRightS2 12
+#define RodilloS1       35
+#define RodilloS2       36
+#define COLORIZQ        2
+#define COLORDER        18
+#define COLORAMBOS      3
 //Inicialiando el IMU
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 //Variables Potencia
 double potDer=0;
-double potIzq=0;
 
+double potIzq=0;
 //Variables "Vision"
 int blocks=0;
 int cordx=0;
@@ -39,8 +42,9 @@ void setup(void) {
   pixy.init();
   Serial.begin(9600);
   bno.begin();
-  delay(1000);
+
   bno.setExtCrystalUse(true);
+  delay(1000);
   double dNorte=dGetDirect();
   Serial.println("El norte esta aqui amiguito: ");
   Serial.println(dNorte);
@@ -56,11 +60,13 @@ void setup(void) {
   pinMode(BackMotorRightS2,OUTPUT);
   pinMode(RodilloS1, OUTPUT);
   pinMode(RodilloS2, OUTPUT);
+  delay(1000);
+ attachInterrupt(digitalPinToInterrupt(COLORAMBOS), moveBack, LOW);
+ attachInterrupt(digitalPinToInterrupt(COLORIZQ) , moveRight, LOW);
+ attachInterrupt(digitalPinToInterrupt(COLORDER),moveLeft , LOW);
 
-    delay(8000);
-  
+
   }
-
 double dGetDirect(){
   sensors_event_t event;
   bno.getEvent(&event);
@@ -83,14 +89,14 @@ void displayCalStatus(void)
   uint8_t system, gyro, accel, mag;
   system = gyro = accel = mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
- 
+
   /* The data should be ignored until the system calibration is > 0 */
   Serial.print("\t");
   if (!system)
   {
     Serial.print("! ");
   }
- 
+
   /* Display the individual values */
   Serial.print("Sys:");
   Serial.print(system, DEC);
@@ -124,66 +130,66 @@ void moveStay(){
   digitalWrite(BackMotorRightS2,HIGH);
  }
 
-void movPers(int p1,int p2, int p3, int p4){
+void movePers(int p1,int p2, int p3, int p4){
     int fL=p1;
     int fR=p2;
     int bL=p3;
     int bR=p4;
     //FrontLeft--------------------------------
     if(fL>=0){
-    fL=constrain(fL,0,100);
-    fL=map(fL,0,100,0,255);
-    analogWrite(FrontMotorLeftS1,fL);
-    analogWrite(FrontMotorLeftS2,LOW);
+      fL=constrain(fL,0,100);
+      fL=map(fL,0,100,0,255);
+      analogWrite(FrontMotorLeftS1,fL);
+      analogWrite(FrontMotorLeftS2,LOW);
     }
     else if(fL<0){
-    fL= fL*-1;
-    fL=constrain(fL,0,100);
-    fL=map(fL,0,100,0,255);
-    analogWrite(FrontMotorLeftS1,LOW);
-    analogWrite(FrontMotorLeftS2,fL);
+      fL= fL*-1;
+      fL=constrain(fL,0,100);
+      fL=map(fL,0,100,0,255);
+      analogWrite(FrontMotorLeftS1,LOW);
+      analogWrite(FrontMotorLeftS2,fL);
     }
     //FrontRight--------------------------------
     if(fR>=0){
-    fR=constrain(fR,0,100);
-    fR=map(fR,0,100,0,255);
-    analogWrite(FrontMotorRightS1,LOW);
-    analogWrite(FrontMotorRightS2,fR);
+      fR=constrain(fR,0,100);
+      fR=map(fR,0,100,0,255);
+      analogWrite(FrontMotorRightS1,LOW);
+      analogWrite(FrontMotorRightS2,fR);
     }
     else if(fR<0){
-    fR= fR*-1;
-    fR=constrain(fR,0,100);
-    fR=map(fR,0,100,0,255);
-    analogWrite(FrontMotorRightS1,fR);
-    analogWrite(FrontMotorRightS2,LOW);
+      fR= fR*-1;
+      fR=constrain(fR,0,100);
+      fR=map(fR,0,100,0,255);
+      analogWrite(FrontMotorRightS1,fR);
+      analogWrite(FrontMotorRightS2,LOW);
     }
     //BackLeft--------------------------------
     if(bL>=0){
-    bL=constrain(bL,0,100);
-    bL=map(bL,0,100,0,255);
-    analogWrite(BackMotorLeftS1,bL);
-    analogWrite(BackMotorLeftS2,LOW);
+      bL=constrain(bL,0,100);
+      bL=map(bL,0,100,0,255);
+      analogWrite(BackMotorLeftS1,bL);
+      analogWrite(BackMotorLeftS2,LOW);
     }
     else if(bL<0){
-    bL= bL*-1;
-    bL=constrain(bL,0,100);
-    bL=map(bL,0,100,0,255);
-    analogWrite(BackMotorLeftS1,LOW);
-    analogWrite(BackMotorLeftS2,bL);
+      bL= bL*-1;
+      bL=constrain(bL,0,100);
+      bL=map(bL,0,100,0,255);
+      analogWrite(BackMotorLeftS1,LOW);
+      analogWrite(BackMotorLeftS2,bL);
     }
     //BackRight--------------------------------
     if(bR>=0){
-    bR=constrain(bR,0,100);
-    bR=map(bR,0,100,0,255);
-    analogWrite(BackMotorRightS1,LOW);
-    analogWrite(BackMotorRightS2,bR);
+      bR=constrain(bR,0,100);
+      bR=map(bR,0,100,0,255);
+      analogWrite(BackMotorRightS1,LOW);
+      analogWrite(BackMotorRightS2,bR);
     }
     else if(bR<0){
-    bR= bR*-1;
-    bR=constrain(bR,0,100);
-    bR=map(bR,0,100,0,255);
-    analogWrite(BackMotorRightS1,bR);
-    analogWrite(BackMotorRightS2,LOW);
+      bR= bR*-1;
+      bR=constrain(bR,0,100);
+      bR=map(bR,0,100,0,255);
+      analogWrite(BackMotorRightS1,bR);
+      analogWrite(BackMotorRightS2,LOW);
     }
  }
 //                       SPIN ORIGINAL
@@ -192,16 +198,16 @@ void spinBallNor(){
   if(dNorti<180){
     while(dNorti<175){
     dNorti=dGetDirect();
-    movPers(0,57,80,-75);  
+    movePers(0,57,80,-75);
     }
   }
    else if(dNorti>180){
      while(dNorti>185){
       dNorti=dGetDirect();
-      movPers(57,0,-80,80);
+      movePers(57,0,-80,80);
       }
     }
-    moveStay();
+  //  moveStay();
 }
 
 /*
@@ -210,7 +216,7 @@ void spinBallNor(){
   if(dNorti<180){
     while(dNorti<175){
     dNorti=dGetDirect();
-    movPers(0,57,80,-75);
+    movePers(0,57,80,-75);
     delay(1);
     }
    // moveFrenos();
@@ -220,7 +226,7 @@ void spinBallNor(){
   else if(dNorti>180){
     while(dNorti>185){
       dNorti=dGetDirect();
-      movPers(57,0,-80,80);
+      movePers(57,0,-80,80);
       delay(1);
     }
    // moveFrenos();
@@ -233,45 +239,45 @@ void spinNorth(){
   double dNorti=dGetDirect();
   if(dNorti<170){
     while(dNorti<175){
-    dNorti=dGetDirect();
-    Serial.println(dNorti);  
-    movPers(20,-20,20,-20);
-    delay(1); 
-    }
-    moveFrenos();
-    //movPers(80,80,80,80);
-    delay(100);
-    moveStay();
+      dNorti=dGetDirect();
+      Serial.println(dNorti);
+      movePers(20,-20,20,-20);
+      delay(1);
+      }
+      //moveFrenos();
+      //movePers(80,80,80,80);
+      //delay(100);
+      moveStay();
   }
   else if(dNorti>190){
     while(dNorti>185){
       dNorti=dGetDirect();
-      Serial.println(dNorti);  
-      movPers(-20,20,-20,20);  
+      Serial.println(dNorti);
+      movePers(-20,20,-20,20);
       delay(1);
     }
-    moveFrenos();
-    //movPers(80,80,80,80);
-    delay(100);
+    //moveFrenos();
+    //movePers(80,80,80,80);
+    //delay(100);
     moveStay();
   }
 }
-  
+
 
 
 void info() {
-  blocks= pixy.getBlocks();  
+  blocks= pixy.getBlocks();
   cordx= pixy.blocks[0].x;  //0-319
   cordy= pixy.blocks[0].y;  //0-199
   altura= pixy.blocks[0].height;
   anchura=pixy.blocks[0].width;
   area= (altura)*(anchura);
   dist=map(area,81,63481,182,1);
-} 
+}
 void checar(){
   static int i = 0;
   int j;
-  uint16_t blocks;  
+  uint16_t blocks;
   blocks = pixy.getBlocks();
   if (blocks==1)
   {
@@ -294,30 +300,65 @@ void checar(){
       Serial.println(dist);
       i=0;
     }
-  }  
+  }
 }
 
 void goBall(){
   potIzq=map(cordx,0,150,40,80);
-  potDer=map(cordx,319,170,40,80);  
+  potDer=map(cordx,319,170,40,80);
   potIzq=constrain(potIzq,40,80);
   potDer=constrain(potDer,40,80);
-  movPers(potIzq,potDer,potIzq,potDer);
-  delay(1);  
+  movePers(potIzq,potDer,potIzq,potDer);
+  delay(1);
 }
 
 void goNorth(){
   potIzq=map(dGetDirect(),360,180,40,80);
-  potDer=map(dGetDirect(),0,180,40,80);  
+  potDer=map(dGetDirect(),0,180,40,80);
   potIzq=constrain(potIzq,40,80);
   potDer=constrain(potDer,40,80);
-  movPers(potIzq,potDer,potIzq,potDer);
-  delay(1);  
+  movePers(potIzq,potDer,potIzq,potDer);
+  delay(1);
 }
 
+void moveRight(){
+  Serial.println("Interrupcion detectada del lado izquierdo ");
+  moveStay();
+  movePers(-40,40,40,-40);
+  for(int x=0; x<35; x++){
+    delayMicroseconds(15000);
+  }
+  moveStay();
+}
+void moveLeft(){
+  Serial.println("Interrupcion detectada del lado derecho ");
+  moveStay();
+  movePers(40, -40, -40, 40);
+  for(int x=0; x<35; x++){
+    delayMicroseconds(15000);
+  }
+  moveStay();
+}
+void moveBack(){
+  Serial.println("Interrupcion detectada de ambos lados ");
+  moveStay();
+  movePers(-40, -40, -40, -40);
+  for(int x=0; x<35; x++){
+    delayMicroseconds(15000);
+  }
+  moveStay();
+}
+//************************************************************************************************************************************************************
 /*
 void loop(){
-  //movPers(50,50,50,50);
+  movePers(-50,-50,-50,-50);
+
+
+}
+*/
+/*
+void loop(){
+  //movePers(50,50,50,50);
   //moveStay();
   //delay(2500);
   //spinBallNor();
@@ -344,7 +385,7 @@ void loop(){
 
 //              ALGORITMO ORIGINAL
 void loop(){
-  
+
    info();
    if(blocks==1){
     moveStay();
@@ -358,7 +399,7 @@ void loop(){
       }
     }
     if(area>30000){
-      
+
         Serial.println(dGetDirect());
         if(dGetDirect()<175 || dGetDirect()>190){
           Serial.println("ya no esta lejos");
@@ -368,6 +409,7 @@ void loop(){
           Serial.println(altura);
           Serial.println(anchura);
           spinBallNor();
+          spinNorth();
         }
         else  if(dGetDirect()>170 && dGetDirect()<190){
           while(blocks!=0){
@@ -383,18 +425,18 @@ void loop(){
      else{
       ultPos=false;
      }
-    
+
   }
   else{
     if(ultPos==true){
-    movPers(-40,40,-40,40);
-    delay(1);  
+    movePers(-40,40,-40,80);
+    delay(1);
     }
     else{
-    movPers(40,-40,40,-40);
+    movePers(40,-40,40,-80);
     delay(1);
     }
   }
 }
 
-
+//****************************************************************************************************************************************************************
