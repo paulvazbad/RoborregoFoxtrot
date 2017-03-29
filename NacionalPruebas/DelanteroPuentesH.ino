@@ -6,19 +6,22 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 //Definiendo motores
-#define FrontMotorLeftS1 5
-#define FrontMotorLeftS2 6
-#define FrontMotorRightS1 9
-#define FrontMotorRightS2 10
-#define BackMotorLeftS1  7
-#define BackMotorLeftS2  8
-#define BackMotorRightS1 11
-#define BackMotorRightS2 12
+#define FrontMotorLeftS1  10
+#define FrontMotorLeftS2  9
+#define FrontMotorRightS1 7
+#define FrontMotorRightS2 8
+#define BackMotorLeftS1  5
+#define BackMotorLeftS2  6
+#define BackMotorRightS1 12
+#define BackMotorRightS2 11
 #define RodilloS1       35
 #define RodilloS2       36
-#define COLORIZQ        2
-#define COLORDER        18
-#define COLORAMBOS      3
+#define COLORIZQ        3
+#define COLORDER        2
+#define COLORAMBOS      18
+#define TRIGGER         15
+#define ECHO            16
+
 //Inicialiando el IMU
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 //Variables Potencia
@@ -61,9 +64,9 @@ void setup(void) {
   pinMode(RodilloS1, OUTPUT);
   pinMode(RodilloS2, OUTPUT);
   delay(1000);
- attachInterrupt(digitalPinToInterrupt(COLORAMBOS), moveBack, LOW);
- attachInterrupt(digitalPinToInterrupt(COLORIZQ) , moveRight, LOW);
- attachInterrupt(digitalPinToInterrupt(COLORDER),moveLeft , LOW);
+  attachInterrupt(digitalPinToInterrupt(COLORAMBOS), moveBack, LOW);
+  attachInterrupt(digitalPinToInterrupt(COLORIZQ) , moveRight, LOW);
+  attachInterrupt(digitalPinToInterrupt(COLORDER),moveLeft , LOW);
 
 
   }
@@ -324,18 +327,18 @@ void goNorth(){
 void moveRight(){
   Serial.println("Interrupcion detectada del lado izquierdo ");
   moveStay();
-  movePers(-40,40,40,-40);
+  movePers(50, -50, -50, 50);
   for(int x=0; x<35; x++){
-    delayMicroseconds(15000);
+    delayMicroseconds(14000);
   }
   moveStay();
 }
 void moveLeft(){
   Serial.println("Interrupcion detectada del lado derecho ");
   moveStay();
-  movePers(40, -40, -40, 40);
+  movePers(-50,50,50,-50);
   for(int x=0; x<35; x++){
-    delayMicroseconds(15000);
+    delayMicroseconds(14000);
   }
   moveStay();
 }
@@ -382,8 +385,25 @@ void loop(){
   }
 }
 */
+void loop(){
+  int iDer, iZQ, iAm;
+  iDer = digitalRead(COLORDER);
+  iZQ = digitalRead(COLORIZQ);
+  iAm = digitalRead(COLORAMBOS);
+  Serial.print("Der ");
+  Serial.println(iDer);
+  Serial.print("Izq ");
+  Serial.println(iZQ);
+  delay(300);
+
+/*  movePers(50,50,70,70);
+  delay(2000);
+  moveStay();
+*/
+}
 
 //              ALGORITMO ORIGINAL
+/*
 void loop(){
 
    info();
@@ -428,7 +448,6 @@ void loop(){
 
   }
   else{
-    moveStay();
     if(ultPos==true){
     movePers(-40,40,-40,80);
     delay(1);
@@ -439,5 +458,5 @@ void loop(){
     }
   }
 }
-
+*/
 //****************************************************************************************************************************************************************
