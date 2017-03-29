@@ -1,0 +1,26 @@
+ void centrarse(){
+    
+    if((dGetDirect>=170 && dGetDirect<=190 && digitalRead(push)==true){
+      if(distanciaDer+distanciaIzq>10 && distanciaDer+distanciaIzq<300){
+        if(distanciaDer<70){
+          movPers(-80,80,80,-80);
+          delay(1);
+          checkcolor();
+        }
+        else if(distanciaIzq<70){
+          movPers(80,-80,-80,80);
+          delay(1);
+          checkcolor();
+        }
+      }
+      else if((distanciaDer<30 || distanciaIzq<30)&&(distanciaDer>0 && distanciaIzq<0)){
+      int ix=0;
+        while(ix<800){  
+          movePers(85,85,85,85);
+          suck();
+          delay(1);
+          checkcolors();
+          ix++;
+       }
+     }
+   }
