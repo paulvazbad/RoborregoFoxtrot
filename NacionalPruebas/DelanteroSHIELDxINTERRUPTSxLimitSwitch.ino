@@ -125,10 +125,11 @@ void displayCalStatus(void)
 }
 
 void moveStay(){
-  FrontLeft->run(BRAKE);
-  FrontRight->run(BRAKE);
-  BackRight->run(BRAKE);
-  BackLeft->run(BRAKE);
+  FrontLeft->run(RELEASE);
+  FrontRight->run(RELEASE);
+  BackRight->run(RELEASE);
+  BackLeft->run(RELEASE);
+  delay(100);
  }
 
 
@@ -341,7 +342,6 @@ void loop(){
       }
     }
     if(area>30000){
-
         Serial.println(dGetDirect());
         if(dGetDirect()<175 || dGetDirect()>190){
           while(digitalRead(push)==1){
@@ -374,12 +374,12 @@ void loop(){
   }
   else{
     if(ultPos==true){
-    movPers(-40,40,-40,40);
-    delay(1);
+      movPers(-40,40,-40,40);
+      delay(1);
     }
     else{
-    movPers(40,-40,40,-40);
-    delay(1);
+      movPers(40,-40,40,-40);
+      delay(1);
     }
     checkColor();
   }
