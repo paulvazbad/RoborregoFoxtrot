@@ -1,0 +1,27 @@
+void Centrarse(){
+   int iUltraR, iUltraL;
+   iUltraR = Distancia('r');
+   iUltraL = Distancia('l');
+   while(iUltraR>CONSTRIGHT && iUltraL<CONSTLEFT){
+     moveRight();
+     iUltraR = Distancia('r');
+     iUltraL = Distancia('l');
+   }
+   while(iUltraR<CONSTRIGHT && iUltraL>CONSTLEFT){
+     moveLeft();
+     iUltraR = Distancia('r');
+     iUltraL = Distancia('l');
+   }
+ }
+ int Distancia(char cUlt){
+   int iDuracion=0, iDistan=0;
+   if(cUlt=='r'){
+     for(int iX=0; iX<10;iX++){
+       digitalWrite(TRIGGER1,HIGH);
+       delay(10);
+       digitalWrite(TRIGGER1, LOW);
+       iDuracion = pulseIn(ECHO1,HIGH);
+       iDistan += iDuracion * 10 / 292/ 2;
+     }
+    iDistan = iDistan/10;
+  }
