@@ -23,6 +23,8 @@
 #define TRIGGERR        99
 #define ECHOR           98
 #define push            35
+#define VULTRAL         24
+#define VULTRAR         25
 //
 #define CMPS11_ADDRESS 0x60  
 #define ANGLE_8  1
@@ -92,6 +94,8 @@ void setup(void) {
  // attachInterrupt(digitalPinToInterrupt(COLORAMBOS), moveBack, LOW);
  // attachInterrupt(digitalPinToInterrupt(COLORIZQ) , moveRight, LOW);
  // attachInterrupt(digitalPinToInterrupt(COLORDER),moveLeft , LOW);
+ digitalWrite(VULTRAL, HIGH);
+ digitalWrite(VULTRAR, HIGH);
 
 
   }
