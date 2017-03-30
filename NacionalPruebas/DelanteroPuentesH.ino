@@ -482,7 +482,7 @@ void loop(){
           Serial.println(anchura);
           spinBallNor();
           spinNorth();
-          if(dNorte==dGetDirect()){
+          if(dGetDirect()>170 && dGetDirect()<190){
           centrarse();
           }
         }
