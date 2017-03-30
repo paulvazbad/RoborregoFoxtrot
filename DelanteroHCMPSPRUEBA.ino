@@ -20,13 +20,13 @@
 //Definiendo ULTRASONICOS
 #define TRIGGERL        15
 #define ECHOL           16
-#define TRIGGERR        99
-#define ECHOR           98
+#define TRIGGERR        17
+#define ECHOR           19
 #define push            35
 #define VULTRAL         24
 #define VULTRAR         25
 //
-#define CMPS11_ADDRESS 0x60  
+#define CMPS11_ADDRESS 0x60
 #define ANGLE_8  1
 
 
@@ -53,19 +53,19 @@ int iComplemento=0;
 int iNorth=0;
 double dNorte;
 int dGetCMPS11(){
- Wire.beginTransmission(CMPS11_ADDRESS);  
-  Wire.write(ANGLE_8);                    
+ Wire.beginTransmission(CMPS11_ADDRESS);
+  Wire.write(ANGLE_8);
   Wire.endTransmission();
- 
- 
-  Wire.requestFrom(CMPS11_ADDRESS, 1);       
-  
-  while(Wire.available() < 1);        
-  
-  angle8 = Wire.read();               
+
+
+  Wire.requestFrom(CMPS11_ADDRESS, 1);
+
+  while(Wire.available() < 1);
+
+  angle8 = Wire.read();
   angle16=map(angle8,0,255,0,360);
-  Serial.print(" NORTE   angle 8: ");        
-  Serial.println(angle8, DEC);  
+  Serial.print(" NORTE   angle 8: ");
+  Serial.println(angle8, DEC);
   delay(100);
   iNorth=angle16;
   iComplemento=360-iNorth;
@@ -90,6 +90,13 @@ void setup(void) {
   pinMode(RodilloS1, OUTPUT);
   pinMode(RodilloS2, OUTPUT);
   pinMode(push, INPUT);
+  //ULTRASONICOS
+  pinMode(ECHOL, INPUT);
+  pinMode(ECHOR, INPUT);
+  pinMode(TRIGGERL, OUTPUT);
+  pinMode(TRIGGERR, OUTPUT);
+  pinMode(VULTRAL,OUTPUT);
+  pinMode(VULTRAR ,OUTPUT);
   delay(200);
  // attachInterrupt(digitalPinToInterrupt(COLORAMBOS), moveBack, LOW);
  // attachInterrupt(digitalPinToInterrupt(COLORIZQ) , moveRight, LOW);
@@ -99,23 +106,19 @@ void setup(void) {
 
 
   }
-double dGetDirect(){    
-  Wire.beginTransmission(CMPS11_ADDRESS);  
-  Wire.write(ANGLE_8);                    
+double dGetDirect(){
+  Wire.beginTransmission(CMPS11_ADDRESS);
+  Wire.write(ANGLE_8);
   Wire.endTransmission();
-  Wire.requestFrom(CMPS11_ADDRESS, 1);       
-  while(Wire.available() < 1);            
-    angle8 = Wire.read();               
-    angle16=map(angle8,0,255,0,360);
-    Serial.print("    MAPEADO angle 16: ");        
-    Serial.println(angle16, DEC);  
-    iAngle=angle16; 
+  Wire.requestFrom(CMPS11_ADDRESS, 1);
+  while(Wire.available() < 1);
+    angle8 = Wire.read();
+    angle16=map(angle8,0,255,0,360);``
+    iAngle=angle16;
     inewAngle=iAngle+iComplemento;
     if(inewAngle>=360){
       inewAngle=inewAngle-360;
     }
-    Serial.print("Nuevo angulo=   ");
-    Serial.println(inewAngle);
   double dOrientacionAct=inewAngle;
   delay(100);
   if(dOrientacionAct<180){
@@ -292,7 +295,7 @@ int Distancia(char cUlt){
        digitalWrite(TRIGGERR,HIGH);
        delay(10);
        digitalWrite(TRIGGERR, LOW);
-       iDuracion = pulseIn(ECHOR,HIGH);
+       iDuracion = pulseIn(ECHOR,HIGH,100000);
        iDistan += iDuracion * 10 / 292/ 2;
      }
   }
@@ -301,7 +304,7 @@ int Distancia(char cUlt){
       digitalWrite(TRIGGERL,HIGH);
       delay(10);
       digitalWrite(TRIGGERL, LOW);
-      iDuracion = pulseIn(ECHOL,HIGH);
+      iDuracion = pulseIn(ECHOL,HIGH,100000);
       iDistan += iDuracion * 10 / 292/ 2;
     }
   }
@@ -419,10 +422,14 @@ void moveBack(){
   moveStay();
 }
 //************************************************************************************************************************************************************
-
 void loop(){
- Serial.println(dGetDirect());
- delay(1000);
+  int iDis;
+  Serial.print("Angulo: ");
+  Serial.println(dGetDirect());
+  delay(100);
+  iDis = Distancia('r');
+  Serial.print("Distancia: ");
+  Serial.println(iDis);
 
 }
 
@@ -468,6 +475,7 @@ void loop(){
   moveStay();
 
 }
+*/
 /*
 //              ALGORITMO ORIGINAL
 
