@@ -104,7 +104,6 @@ void setup(void) {
  digitalWrite(VULTRAL, HIGH);
  digitalWrite(VULTRAR, HIGH);
 
-
   }
 double dGetDirect(){
   Wire.beginTransmission(CMPS11_ADDRESS);
@@ -113,7 +112,7 @@ double dGetDirect(){
   Wire.requestFrom(CMPS11_ADDRESS, 1);
   while(Wire.available() < 1);
     angle8 = Wire.read();
-    angle16=map(angle8,0,255,0,360);``
+    angle16=map(angle8,0,255,0,360);
     iAngle=angle16;
     inewAngle=iAngle+iComplemento;
     if(inewAngle>=360){
@@ -423,14 +422,16 @@ void moveBack(){
 }
 //************************************************************************************************************************************************************
 void loop(){
-  int iDis;
+  int iDisR, iDisL;
   Serial.print("Angulo: ");
   Serial.println(dGetDirect());
-  delay(100);
-  iDis = Distancia('r');
-  Serial.print("Distancia: ");
-  Serial.println(iDis);
-
+  iDisR = Distancia('r');
+  Serial.print("Distancia Derecha : ");
+  Serial.println(iDisR);
+  Serial.println("Distancia Izquierda: ");
+  iDisL = Distancia('l');
+  Serial.println(iDisL);
+  delay(500);
 }
 
 /*
