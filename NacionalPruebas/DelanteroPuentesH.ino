@@ -16,17 +16,21 @@
 #define BackMotorRightS2 11
 #define RodilloS1       35
 #define RodilloS2       36
+//Definiendo Colores
 #define COLORIZQ        3
 #define COLORDER        2
 #define COLORAMBOS      18
-#define TRIGGER         15
-#define ECHO            16
+//Definiendo ULTRASONICOS
+#define TRIGGERL        15
+#define ECHOL           16
+#define TRIGGERR        99
+#define ECHOR           98
+#define push            35
 
 //Inicialiando el IMU
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 //Variables Potencia
 double potDer=0;
-
 double potIzq=0;
 //Variables "Vision"
 int blocks=0;
@@ -39,7 +43,7 @@ int anchura=0;
 bool ultPos=0;
 
 Pixy pixy;
-
+double dNorte;
 
 void setup(void) {
   pixy.init();
@@ -47,8 +51,8 @@ void setup(void) {
   bno.begin();
 
   bno.setExtCrystalUse(true);
-  delay(1000);
-  double dNorte=dGetDirect();
+  delay(20);
+  dNorte=dGetDirect();
   Serial.println("El norte esta aqui amiguito: ");
   Serial.println(dNorte);
   //Puentes H
@@ -63,7 +67,8 @@ void setup(void) {
   pinMode(BackMotorRightS2,OUTPUT);
   pinMode(RodilloS1, OUTPUT);
   pinMode(RodilloS2, OUTPUT);
-  delay(1000);
+  pinMode(push, INPUT);
+  delay(200);
   attachInterrupt(digitalPinToInterrupt(COLORAMBOS), moveBack, LOW);
   attachInterrupt(digitalPinToInterrupt(COLORIZQ) , moveRight, LOW);
   attachInterrupt(digitalPinToInterrupt(COLORDER),moveLeft , LOW);
@@ -266,7 +271,56 @@ void spinNorth(){
   }
 }
 
-
+//ULTRASONICOS
+int Distancia(char cUlt){
+   int iDuracion=0, iDistan=0;
+   if(cUlt=='r'){
+     for(int iX=0; iX<10;iX++){
+       digitalWrite(TRIGGERR,HIGH);
+       delay(10);
+       digitalWrite(TRIGGERR, LOW);
+       iDuracion = pulseIn(ECHOR,HIGH);
+       iDistan += iDuracion * 10 / 292/ 2;
+     }
+  }
+  else if (cUlt=='l'){
+    for(int iX=0; iX<10;iX++){
+      digitalWrite(TRIGGERL,HIGH);
+      delay(10);
+      digitalWrite(TRIGGERL, LOW);
+      iDuracion = pulseIn(ECHOL,HIGH);
+      iDistan += iDuracion * 10 / 292/ 2;
+    }
+  }
+  iDistan = iDistan/10;
+  return iDistan;
+}
+void centrarse(){
+   if((dGetDirect>=170 && dGetDirect<=190) && (digitalRead(push)==1)){
+     int distanciaDer, distanciaIzq;
+     distanciaDer = Distancia('r');
+     distanciaIzq = Distancia('l');
+     if(distanciaDer+distanciaIzq>10 && distanciaDer+distanciaIzq<300){
+       if(distanciaDer<70){
+         movePers(-80,80,80,-80);
+         delay(1);
+       }
+       else if(distanciaIzq<70){
+         movePers(80,-80,-80,80);
+         delay(1);
+       }
+     }
+     else if((distanciaDer<30 || distanciaIzq<30)&&(distanciaDer>0 && distanciaIzq>0)){
+     int ix=0;
+       while(ix<800){
+         movePers(85,85,85,85);
+         delay(1);
+         ix++;
+      }
+    }
+  }
+}
+//
 
 void info() {
   blocks= pixy.getBlocks();
@@ -385,7 +439,7 @@ void loop(){
   }
 }
 */
-void loop(){
+/*void loop(){
   int iDer, iZQ, iAm;
   iDer = digitalRead(COLORDER);
   iZQ = digitalRead(COLORIZQ);
@@ -396,16 +450,15 @@ void loop(){
   Serial.println(iZQ);
   delay(300);
 
-/*  movePers(50,50,70,70);
+  movePers(50,50,70,70);
   delay(2000);
   moveStay();
-*/
+
 }
-
+*/
 //              ALGORITMO ORIGINAL
-/*
-void loop(){
 
+void loop(){
    info();
    if(blocks==1){
     moveStay();
@@ -419,7 +472,6 @@ void loop(){
       }
     }
     if(area>30000){
-
         Serial.println(dGetDirect());
         if(dGetDirect()<175 || dGetDirect()>190){
           Serial.println("ya no esta lejos");
@@ -430,10 +482,14 @@ void loop(){
           Serial.println(anchura);
           spinBallNor();
           spinNorth();
+          if(dNorte==dGetDirect()){
+          centrarse();
+          }
         }
         else  if(dGetDirect()>170 && dGetDirect()<190){
           while(blocks!=0){
             info();
+            centrarse();
             goNorth();
             Serial.println("VOY AL NORTEE  ");
           }
@@ -458,5 +514,6 @@ void loop(){
     }
   }
 }
-*/
+
+
 //****************************************************************************************************************************************************************
