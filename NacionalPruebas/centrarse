@@ -13,7 +13,7 @@
           checkcolor();
         }
       }
-      else if((distanciaDer<30 || distanciaIzq<30)&&(distanciaDer>0 && distanciaIzq<0)){
+      else if((distanciaDer<30 || distanciaIzq<30)&&(distanciaDer>0 && distanciaIzq>0)){
       int ix=0;
         while(ix<800){  
           movePers(85,85,85,85);
