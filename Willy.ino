@@ -14,8 +14,6 @@
 #define BackMotorLeftS2  6
 #define BackMotorRightS1 12
 #define BackMotorRightS2 11
-#define RodilloS1       35
-#define RodilloS2       36
 //Definiendo Colores
 #define COLORIZQ        2
 #define COLORDER        3
