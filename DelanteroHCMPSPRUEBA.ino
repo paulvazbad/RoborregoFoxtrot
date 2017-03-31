@@ -103,7 +103,7 @@ void setup(void) {
  // attachInterrupt(digitalPinToInterrupt(COLORDER),moveLeft , LOW);
  digitalWrite(VULTRAL, HIGH);
  digitalWrite(VULTRAR, HIGH);
-
+ pixy.init();
   }
 double dGetDirect(){
   Wire.beginTransmission(CMPS11_ADDRESS);
@@ -220,25 +220,26 @@ void spinBallNor(){
   double dNorti=dGetDirect();
   if(dNorti<180){
     while(dNorti<170){
-    dNorti=dGetDirect();
+
     int iPot;
-    iPot=map(dGetDirect(),90,180,30,10);
-    iPot= constrain(iPot, 10, 30);
+    iPot=map(dGetDirect(),90,180,40,15);
+    iPot= constrain(iPot, 15, 40);
     movePers(0,0,iPot,-iPot);
     delay(1);
+    dNorti=dGetDirect();
     }
   }
    else if(dNorti>180){
      while(dNorti>190){
-       dNorti=dGetDirect();
        int iPot;
-       iPot=map(dGetDirect(),270,180,30,10);
-       iPot= constrain(iPot, 10, 30);
-       movePers(0,0,iPot,-iPot);
+       iPot=map(dGetDirect(),270,180,40,15);
+       iPot= constrain(iPot, 15, 40);
+       movePers(0,0,-iPot,iPot);
        delay(1);
+       dNorti=dGetDirect();
       }
     }
-  //  moveStay();
+  moveStay();
 }
 
 /*
@@ -435,7 +436,7 @@ void moveBack(){
   moveStay();
 }
 //************************************************************************************************************************************************************
-void loop(){
+/*void loop(){
   int iDisR, iDisL;
   Serial.print("Angulo: ");
   Serial.println(dGetDirect());
@@ -445,10 +446,9 @@ void loop(){
   Serial.println("Distancia Izquierda: ");
   iDisL = Distancia('l');
   Serial.println(iDisL);
-  delay(500);
   spinBallNor();
 }
-
+*/
 /*
 void loop(){
   //movePers(50,50,50,50);
@@ -492,10 +492,11 @@ void loop(){
 
 }
 */
-/*
+
 //              ALGORITMO ORIGINAL
 
 void loop(){
+  Serial.println("Entre al loop");
    info();
    if(blocks==1){
     moveStay();
@@ -541,6 +542,7 @@ void loop(){
 
   }
   else{
+    Serial.println("No veo la pelota pero la voy a buscar");
     if(ultPos==true){
     movePers(-40,40,-40,80);
     delay(1);
@@ -550,4 +552,4 @@ void loop(){
     delay(1);
     }
   }
-}*/
+}
