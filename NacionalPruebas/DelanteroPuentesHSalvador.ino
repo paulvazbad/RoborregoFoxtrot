@@ -2,9 +2,6 @@
 #include <Wire.h>
 #include <SPI.h>
 
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BNO055.h>
-#include <utility/imumaths.h>
 //Definiendo motores
 #define FrontMotorLeftS1  10
 #define FrontMotorLeftS2  9
@@ -17,23 +14,27 @@
 #define RodilloS1       35
 #define RodilloS2       36
 //Definiendo Colores
-#define COLORIZQ        3
-#define COLORDER        2
+#define COLORIZQ        2
+#define COLORDER        3
 #define COLORAMBOS      18
 //Definiendo ULTRASONICOS
 #define TRIGGERL        15
 #define ECHOL           16
-#define TRIGGERR        99
-#define ECHOR           98
+#define TRIGGERR        17
+#define ECHOR           19
 #define push            35
-
-//Inicialiando el IMU
-Adafruit_BNO055 bno = Adafruit_BNO055(55);
+#define VULTRAL         24
+#define VULTRAR         25
+//
+#define CMPS11_ADDRESS 0x60
+#define ANGLE_8  1
+#define AREACONST       20000
+double dNorti=180;
 //Variables Potencia
 double potDer=0;
 double potIzq=0;
 //Variables "Vision"
-int blocks=0;
+int blocks=1;
 int cordx=0;
 int cordy=0;
 unsigned long area=0;
@@ -43,16 +44,38 @@ int anchura=0;
 bool ultPos=0;
 
 Pixy pixy;
+
+unsigned char angle8;
+unsigned int angle16;
+int iAngle=0;
+int inewAngle=0;
+int iComplemento=0;
+int iNorth=0;
 double dNorte;
+int ultGyr=-1;
+int dGetCMPS11(){
+ Wire.beginTransmission(CMPS11_ADDRESS);
+  Wire.write(ANGLE_8);
+  Wire.endTransmission();
 
+
+  Wire.requestFrom(CMPS11_ADDRESS, 1);
+
+  while(Wire.available() < 1);
+
+  angle8 = Wire.read();
+  angle16=map(angle8,0,255,0,360);
+  Serial.print(" NORTE   angle 8: ");
+  Serial.println(angle8, DEC);
+  delay(100);
+  iNorth=angle16;
+  iComplemento=360-iNorth;
+}
 void setup(void) {
-  pixy.init();
   Serial.begin(9600);
-  bno.begin();
-
-  bno.setExtCrystalUse(true);
-  delay(20);
-  dNorte=dGetDirect();
+  Wire.begin();
+  delay(2000);
+  dNorte=dGetCMPS11();
   Serial.println("El norte esta aqui amiguito: ");
   Serial.println(dNorte);
   //Puentes H
@@ -68,17 +91,38 @@ void setup(void) {
   pinMode(RodilloS1, OUTPUT);
   pinMode(RodilloS2, OUTPUT);
   pinMode(push, INPUT);
+  //ULTRASONICOS
+  pinMode(ECHOL, INPUT);
+  pinMode(ECHOR, INPUT);
+  pinMode(TRIGGERL, OUTPUT);
+  pinMode(TRIGGERR, OUTPUT);
+  pinMode(VULTRAL,OUTPUT);
+  pinMode(VULTRAR ,OUTPUT);
   delay(200);
-  attachInterrupt(digitalPinToInterrupt(COLORAMBOS), moveBack, LOW);
   attachInterrupt(digitalPinToInterrupt(COLORIZQ) , moveRight, LOW);
-  attachInterrupt(digitalPinToInterrupt(COLORDER),moveLeft , LOW);
-
-
+ attachInterrupt(digitalPinToInterrupt(COLORDER),moveLeft , LOW);
+ digitalWrite(VULTRAL, HIGH);
+ digitalWrite(VULTRAR, HIGH);
+ pixy.init();
+   info();
+ movePers(90,90,90,90);
+ delay(500);
+ moveStay();
   }
 double dGetDirect(){
-  sensors_event_t event;
-  bno.getEvent(&event);
-  double dOrientacionAct=event.orientation.x;
+  Wire.beginTransmission(CMPS11_ADDRESS);
+  Wire.write(ANGLE_8);
+  Wire.endTransmission();
+  Wire.requestFrom(CMPS11_ADDRESS, 1);
+  while(Wire.available() < 1);
+    angle8 = Wire.read();
+    angle16=map(angle8,0,255,0,360);
+    iAngle=angle16;
+    inewAngle=iAngle+iComplemento;
+   if(inewAngle>=360){
+      inewAngle=inewAngle-360;
+    }
+  double dOrientacionAct=inewAngle;
   delay(100);
   if(dOrientacionAct<180){
     dOrientacionAct=dOrientacionAct+180;
@@ -89,32 +133,7 @@ double dGetDirect(){
   return dOrientacionAct;
 }
 
-void displayCalStatus(void)
-{
-  /* Get the four calibration values (0..3) */
-  /* Any sensor data reporting 0 should be ignored, */
-  /* 3 means 'fully calibrated" */
-  uint8_t system, gyro, accel, mag;
-  system = gyro = accel = mag = 0;
-  bno.getCalibration(&system, &gyro, &accel, &mag);
 
-  /* The data should be ignored until the system calibration is > 0 */
-  Serial.print("\t");
-  if (!system)
-  {
-    Serial.print("! ");
-  }
-
-  /* Display the individual values */
-  Serial.print("Sys:");
-  Serial.print(system, DEC);
-  Serial.print(" G:");
-  Serial.print(gyro, DEC);
-  Serial.print(" A:");
-  Serial.print(accel, DEC);
-  Serial.print(" M:");
-  Serial.println(mag, DEC);
-}
 
 void moveStay(){
   digitalWrite(FrontMotorLeftS1,LOW);
@@ -202,74 +221,57 @@ void movePers(int p1,int p2, int p3, int p4){
  }
 //                       SPIN ORIGINAL
 void spinBallNor(){
-  double dNorti=dGetDirect();
+  dNorti=dGetDirect();
   if(dNorti<180){
-    while(dNorti<175){
-    dNorti=dGetDirect();
-    movePers(0,57,80,-75);
-    }
-  }
-   else if(dNorti>180){
-     while(dNorti>185){
+    while(dNorti<176 && area>AREACONST){
       dNorti=dGetDirect();
-      movePers(57,0,-80,80);
-      }
+    int iPot;
+    //iPot=map(dGetDirect(),90,180,40,15);
+    movePers(0,30,50,-50);
     }
-  //  moveStay();
-}
-
-/*
-void spinBallNor(){
-  double dNorti=dGetDirect();
-  if(dNorti<180){
-    while(dNorti<175){
-    dNorti=dGetDirect();
-    movePers(0,57,80,-75);
-    delay(1);
-    }
-   // moveFrenos();
-   // delay(10);
-    moveStay();
   }
   else if(dNorti>180){
-    while(dNorti>185){
-      dNorti=dGetDirect();
-      movePers(57,0,-80,80);
-      delay(1);
-    }
-   // moveFrenos();
-   // delay(10);
-    moveStay();
-  }
-}*/
-
-void spinNorth(){
-  double dNorti=dGetDirect();
-  if(dNorti<170){
-    while(dNorti<175){
-      dNorti=dGetDirect();
-      Serial.println(dNorti);
-      movePers(20,-20,20,-20);
-      delay(1);
+     while(dNorti>184 && area>AREACONST){
+       dNorti=dGetDirect();
+       int iPot;
+       //iPot=map(dGetDirect(),270,180,40,15);
+       //iPot= constrain(iPot, 15, 40);
+       //movePers(0,0,-iPot,iPot);
+       movePers(30,0,-50,50);
+        }
       }
-      //moveFrenos();
-      //movePers(80,80,80,80);
-      //delay(100);
       moveStay();
-  }
-  else if(dNorti>190){
-    while(dNorti>185){
-      dNorti=dGetDirect();
-      Serial.println(dNorti);
-      movePers(-20,20,-20,20);
-      delay(1);
     }
-    //moveFrenos();
-    //movePers(80,80,80,80);
-    //delay(100);
+
+    void spinNorth(){
+      Serial.println("Estoy Spineando North");
+      double dNorti=dGetDirect();
+      if(dNorti<170){
+        while(dNorti<175){
+          dNorti=dGetDirect();
+          Serial.println(dNorti);
+          movePers(20,-20,20,-20);
+          delay(1);
+          }
+          //moveFrenos();
+          //movePers(80,80,80,80);
+          //delay(100);
+          moveStay();
+      }
+      else if(dNorti>190){
+        while(dNorti>185){
+          dNorti=dGetDirect();
+          Serial.println(dNorti);
+          movePers(-20,20,-20,20);
+          delay(1);
+        }
+        //moveFrenos();
+        //movePers(80,80,80,80);
+        //delay(100);
+        moveStay();
+      }
     moveStay();
-  }
-}
+    }
 
 //ULTRASONICOS
 int Distancia(char cUlt){
@@ -279,7 +281,7 @@ int Distancia(char cUlt){
        digitalWrite(TRIGGERR,HIGH);
        delay(10);
        digitalWrite(TRIGGERR, LOW);
-       iDuracion = pulseIn(ECHOR,HIGH);
+       iDuracion = pulseIn(ECHOR,HIGH,100000);
        iDistan += iDuracion * 10 / 292/ 2;
      }
   }
@@ -288,7 +290,7 @@ int Distancia(char cUlt){
       digitalWrite(TRIGGERL,HIGH);
       delay(10);
       digitalWrite(TRIGGERL, LOW);
-      iDuracion = pulseIn(ECHOL,HIGH);
+      iDuracion = pulseIn(ECHOL,HIGH,100000);
       iDistan += iDuracion * 10 / 292/ 2;
     }
   }
@@ -361,12 +363,30 @@ void checar(){
 }
 
 void goBall(){
-  potIzq=map(cordx,0,150,40,80);
-  potDer=map(cordx,319,170,40,80);
-  potIzq=constrain(potIzq,40,80);
-  potDer=constrain(potDer,40,80);
-  movePers(potIzq,potDer,potIzq,potDer);
-  delay(1);
+  if(dGetDirect()>100 && dGetDirect()<250){
+    potDer=map(cordx,0,150,40,80);
+    potIzq=map(cordx,319,170,40,80);
+    potDer=constrain(potIzq,40,80);
+    potIzq=constrain(potDer,40,80);
+    movePers(potIzq,potDer+10,potIzq,potDer+10);
+    delay(1);
+  }
+  else{
+    if(area>AREACONST){
+      potDer=20;
+      potIzq=20;
+      movePers(potIzq,potDer+5,potIzq,potDer=5);
+      delay(1);
+    }
+    else{
+      potDer=map(cordx,0,150,20,40);
+      potIzq=map(cordx,319,170,20,40);
+      potDer=constrain(potIzq,20,40);
+      potIzq=constrain(potDer,20,40);
+      movePers(potIzq,(potDer+10),potIzq,(potDer+10));
+      delay(1);
+    }
+  }
 }
 
 void goNorth(){
@@ -374,7 +394,7 @@ void goNorth(){
   potDer=map(dGetDirect(),0,180,40,80);
   potIzq=constrain(potIzq,40,80);
   potDer=constrain(potDer,40,80);
-  movePers(potIzq,potDer,potIzq,potDer);
+  movePers(potIzq,(potDer+10),potIzq,potDer);
   delay(1);
 }
 
@@ -406,11 +426,23 @@ void moveBack(){
   moveStay();
 }
 //************************************************************************************************************************************************************
-/*
-void loop(){
-  movePers(-50,-50,-50,-50);
-
-
+/*void loop(){
+  info();
+  Serial.println(area);
+  delay(200);
+}
+*/
+/*void loop(){
+  int iDisR, iDisL;
+  Serial.print("Angulo: ");
+  Serial.println(dGetDirect());
+  iDisR = Distancia('r');
+  Serial.print("Distancia Derecha : ");
+  Serial.println(iDisR);
+  Serial.println("Distancia Izquierda: ");
+  iDisL = Distancia('l');
+  Serial.println(iDisL);
+  spinBallNor();
 }
 */
 /*
@@ -439,7 +471,8 @@ void loop(){
   }
 }
 */
-/*void loop(){
+/*
+void loop(){
   int iDer, iZQ, iAm;
   iDer = digitalRead(COLORDER);
   iZQ = digitalRead(COLORIZQ);
@@ -450,46 +483,51 @@ void loop(){
   Serial.println(iZQ);
   delay(300);
 
-  movePers(50,50,70,70);
-  delay(2000);
-  moveStay();
 
 }
 */
+
 //              ALGORITMO ORIGINAL
 
 void loop(){
    info();
    if(blocks==1){
-    moveStay();
+     moveStay();
     Serial.println("Si veo");
-    if(area<30000){
+    info();
+    if(area<AREACONST){
       Serial.println("Si esta lejos");
-      while(area<30000 && blocks>0){
+      while(area<AREACONST && blocks>0){
         Serial.println("Si quiero ir a la bola");
         info();
         goBall();
       }
     }
-    if(area>30000){
+    if(area>AREACONST){
+      /*if(ultGyr==1){
+         movePers(-30,30,-30,30);
+         delay(80);
+       }
+       else if (ultGyr==0){
+          movePers(30,-30,30,-30);
+          delay(80);
+       }
+       */
         Serial.println(dGetDirect());
-        if(dGetDirect()<175 || dGetDirect()>190){
+         dNorti=dGetDirect();
+        if(dNorti<160 || dNorti>190){
           Serial.println("ya no esta lejos");
-          Serial.println(dGetDirect());
-          Serial.print("El area es: ");
-          Serial.println(area);
-          Serial.println(altura);
-          Serial.println(anchura);
           spinBallNor();
           spinNorth();
-          if(dGetDirect()>170 && dGetDirect()<190){
-          centrarse();
-          }
+        //  spinNorth();
+          //if(dGetDirect()>170 && dGetDirect()<190){
+          //centrarse();
+          //}
         }
-        else  if(dGetDirect()>170 && dGetDirect()<190){
+        else if(dGetDirect()>=160 && dGetDirect()<=190){
           while(blocks!=0){
             info();
-            centrarse();
+            //centrarse();
             goNorth();
             Serial.println("VOY AL NORTEE  ");
           }
@@ -504,16 +542,16 @@ void loop(){
 
   }
   else{
+    Serial.println("No veo la pelota pero la voy a buscar");
     if(ultPos==true){
-    movePers(-40,40,-40,80);
-    delay(1);
+      movePers(30,-30,30,-30);
+      delay(1);
+      ultGyr=1;
     }
     else{
-    movePers(40,-40,40,-80);
-    delay(1);
+      movePers(-30,30,-30,30);
+      delay(1);
+      ultGyr=0;
     }
   }
 }
-
-
-//****************************************************************************************************************************************************************
