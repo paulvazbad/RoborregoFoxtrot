@@ -219,15 +219,23 @@ void movePers(int p1,int p2, int p3, int p4){
 void spinBallNor(){
   double dNorti=dGetDirect();
   if(dNorti<180){
-    while(dNorti<175){
+    while(dNorti<170){
     dNorti=dGetDirect();
-    movePers(0,57,80,-75);
+    int iPot;
+    iPot=map(dGetDirect(),90,180,30,10);
+    iPot= constrain(iPot, 10, 30);
+    movePers(0,0,iPot,-iPot);
+    delay(1);
     }
   }
    else if(dNorti>180){
-     while(dNorti>185){
-      dNorti=dGetDirect();
-      movePers(57,0,-80,80);
+     while(dNorti>190){
+       dNorti=dGetDirect();
+       int iPot;
+       iPot=map(dGetDirect(),270,180,30,10);
+       iPot= constrain(iPot, 10, 30);
+       movePers(0,0,iPot,-iPot);
+       delay(1);
       }
     }
   //  moveStay();
@@ -260,11 +268,14 @@ void spinBallNor(){
 
 void spinNorth(){
   double dNorti=dGetDirect();
-  if(dNorti<170){
-    while(dNorti<175){
+  if(dNorti<180){
+    while(dNorti<170){
       dNorti=dGetDirect();
       Serial.println(dNorti);
-      movePers(20,-20,20,-20);
+      int iPot;
+      iPot=map(dGetDirect(),90,180,30,10);
+      iPot= constrain(iPot, 10, 30);
+      movePers(iPot,-iPot,iPot,-iPot);
       delay(1);
       }
       //moveFrenos();
@@ -272,11 +283,14 @@ void spinNorth(){
       //delay(100);
       moveStay();
   }
-  else if(dNorti>190){
-    while(dNorti>185){
+  else if(dNorti>180){
+    while(dNorti>190){
       dNorti=dGetDirect();
       Serial.println(dNorti);
-      movePers(-20,20,-20,20);
+      int iPot;
+      iPot=map(dGetDirect(),270,180,30,10);
+      iPot= constrain(iPot, 10, 30);
+      movePers(-iPot,iPot,-iPot,iPot);
       delay(1);
     }
     //moveFrenos();
@@ -432,6 +446,7 @@ void loop(){
   iDisL = Distancia('l');
   Serial.println(iDisL);
   delay(500);
+  spinBallNor();
 }
 
 /*
